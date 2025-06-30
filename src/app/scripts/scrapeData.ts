@@ -1,6 +1,5 @@
-/* eslint-disable @typescript-eslint/no-require-imports */
-const cheerio = require('cheerio');
-// const supabase = require('../utils/supabaseClient')
+import * as cheerio from 'cheerio';
+import { supabase } from "../utils/supabaseClient";
 
 async function scrapeData() {
   const STATS_URL =
@@ -20,8 +19,8 @@ async function scrapeData() {
     }[] = [];
 
     $('#per_game_stats tbody tr')
-      .not('.thead')
-      .each((_: number, row: Element) => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      .each((_: number, row: any) => {
         const player_name = $(row)
           .find('td[data-stat="name_display"] a')
           .first()
@@ -83,15 +82,15 @@ async function scrapeData() {
       console.log(player);
     }
 
-    // const { data, error } = await supabase
-    //   .from('players')
-    //   .insert(filteredPlayers);
+    const { data, error } = await supabase
+      .from('Players')
+      .insert(filteredPlayers);
 
-    // if (error) {
-    //   console.error('Supabase insert error:', error);
-    // } else {
-    //   console.log('Inserted players:', data);
-    // }
+    if (error) {
+      console.error('Supabase insert error:', error);
+    } else {
+      console.log('Inserted players:', data);
+    }
   } catch (error) {
     console.error('Error scraping data:', error);
   }
