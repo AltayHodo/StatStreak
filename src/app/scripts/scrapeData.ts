@@ -1,5 +1,5 @@
 import * as cheerio from 'cheerio';
-import { supabase } from "../utils/supabaseClient";
+import { supabase } from '../utils/supabaseClient';
 
 async function scrapeData() {
   const STATS_URL =
@@ -16,6 +16,15 @@ async function scrapeData() {
       points_per_game: string;
       assists_per_game: string;
       rebounds_per_game: string;
+      blocks_per_game: string;
+      steals_per_game: string;
+      turnovers_per_game: string;
+      field_goal_percentage: string;
+      three_point_percentage: string;
+      free_throw_percentage: string;
+      effective_field_goal_percentage: string;
+      three_pointers_per_game: string;
+      minutes_played_per_game: string;
     }[] = [];
 
     $('#per_game_stats tbody tr')
@@ -46,14 +55,69 @@ async function scrapeData() {
           .first()
           .text()
           .trim();
-
+        const blocks_per_game = $(row)
+          .find('td[data-stat="blk_per_g"]')
+          .first()
+          .text()
+          .trim();
+        const steals_per_game = $(row)
+          .find('td[data-stat="stl_per_g"]')
+          .first()
+          .text()
+          .trim();
+        const turnovers_per_game = $(row)
+          .find('td[data-stat="tov_per_g"]')
+          .first()
+          .text()
+          .trim();
+        const field_goal_percentage = $(row)
+          .find('td[data-stat="fg_pct"]')
+          .first()
+          .text()
+          .trim();
+        const three_point_percentage = $(row)
+          .find('td[data-stat="fg3_pct"]')
+          .first()
+          .text()
+          .trim();
+        const free_throw_percentage = $(row)
+          .find('td[data-stat="ft_pct"]')
+          .first()
+          .text()
+          .trim();
+        const effective_field_goal_percentage = $(row)
+          .find('td[data-stat="efg_pct"]')
+          .first()
+          .text()
+          .trim();
+        const three_pointers_per_game = $(row)
+          .find('td[data-stat="fg3_per_g"]')
+          .first()
+          .text()
+          .trim();
+        const minutes_played_per_game = $(row)
+          .find('td[data-stat="mp_per_g"]')
+          .first()
+          .text()
+          .trim();
         if (!player_name) return;
         players.push({
           player_name,
           team_name,
-          points_per_game,
-          assists_per_game,
-          rebounds_per_game,
+          points_per_game: emptyToZeroString(points_per_game),
+          assists_per_game: emptyToZeroString(assists_per_game),
+          rebounds_per_game: emptyToZeroString(rebounds_per_game),
+          blocks_per_game: emptyToZeroString(blocks_per_game),
+          steals_per_game: emptyToZeroString(steals_per_game),
+          turnovers_per_game: emptyToZeroString(turnovers_per_game),
+          field_goal_percentage: emptyToZeroString(field_goal_percentage),
+          three_point_percentage: emptyToZeroString(three_point_percentage),
+          free_throw_percentage: emptyToZeroString(free_throw_percentage),
+          effective_field_goal_percentage: emptyToZeroString(
+            effective_field_goal_percentage
+          ),
+          three_pointers_per_game: emptyToZeroString(three_pointers_per_game),
+          minutes_played_per_game: emptyToZeroString(minutes_played_per_game),
         });
       });
 
@@ -82,6 +146,16 @@ async function scrapeData() {
       console.log(player);
     }
 
+    // const firstRow = $('#per_game_stats tbody tr').first();
+    // console.log(firstRow.html());
+
+    const { error: deleteError } = await supabase
+      .from('Players')
+      .delete()
+      .neq('id', 0);
+    if (deleteError) {
+      console.error('Error clearing Players table:', deleteError);
+    }
     const { data, error } = await supabase
       .from('Players')
       .insert(filteredPlayers);
@@ -94,6 +168,10 @@ async function scrapeData() {
   } catch (error) {
     console.error('Error scraping data:', error);
   }
+}
+
+function emptyToZeroString(value: string): string {
+  return value.trim() === '' ? '0' : value.trim();
 }
 
 scrapeData();
