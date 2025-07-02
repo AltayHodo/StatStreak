@@ -2,13 +2,15 @@ import * as cheerio from 'cheerio';
 import { supabase } from '../utils/supabaseClient';
 
 async function scrapeData() {
-  const STATS_URL =
+  const PER_GAME_URL =
     'https://www.basketball-reference.com/leagues/NBA_2025_per_game.html';
+  const ADVANCED_URL =
+    'https://www.basketball-reference.com/leagues/NBA_2025_advanced.html';
 
   try {
-    const response = await fetch(STATS_URL);
-    const html = await response.text();
-    const $ = cheerio.load(html);
+    let response = await fetch(PER_GAME_URL);
+    let html = await response.text();
+    let $ = cheerio.load(html);
 
     const players: {
       player_name: string;
@@ -142,29 +144,64 @@ async function scrapeData() {
     }
 
     filteredPlayers = filteredPlayers.slice(0, 400);
-    for (const player of filteredPlayers) {
-      console.log(player);
-    }
+    // for (const player of filteredPlayers) {
+    //   console.log(player);
+    // }
 
     // const firstRow = $('#per_game_stats tbody tr').first();
     // console.log(firstRow.html());
 
-    const { error: deleteError } = await supabase
-      .from('Players')
-      .delete()
-      .neq('id', 0);
-    if (deleteError) {
-      console.error('Error clearing Players table:', deleteError);
-    }
-    const { data, error } = await supabase
-      .from('Players')
-      .insert(filteredPlayers);
+    response = await fetch(ADVANCED_URL);
+    html = await response.text();
+    $ = cheerio.load(html);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    $('.stats_table tbody tr').each((_: number, row: any) => {
+      const player_name = $(row)
+        .find('td[data-stat="name_display"] a')
+        .first()
+        .text()
+        .trim();
+      const player_efficiency_Rating = $(row)
+        .find('td[data-stat="per"]')
+        .first()
+        .text()
+        .trim();
+      const usage_rate = $(row)
+        .find('td[data-stat="usg_pct"]')
+        .first()
+        .text()
+        .trim();
+      const box_plus_minus = $(row)
+        .find('td[data-stat="bpm"]')
+        .first()
+        .text()
+        .trim();
+      console.log({
+        player_name,
+        player_efficiency_Rating,
+        usage_rate,
+        box_plus_minus
+      })
+    });
+    const firstRow = $('.stats_table tbody tr').first();
+    console.log(firstRow.html());
 
-    if (error) {
-      console.error('Supabase insert error:', error);
-    } else {
-      console.log('Inserted players:', data);
-    }
+    // const { error: deleteError } = await supabase
+    //   .from('Players')
+    //   .delete()
+    //   .neq('id', 0);
+    // if (deleteError) {
+    //   console.error('Error clearing Players table:', deleteError);
+    // }
+    // const { data, error } = await supabase
+    //   .from('Players')
+    //   .insert(filteredPlayers);
+
+    // if (error) {
+    //   console.error('Supabase insert error:', error);
+    // } else {
+    //   console.log('Inserted players:', data);
+    // }
   } catch (error) {
     console.error('Error scraping data:', error);
   }
