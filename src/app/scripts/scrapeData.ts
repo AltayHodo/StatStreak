@@ -27,6 +27,9 @@ async function scrapeData() {
       effective_field_goal_percentage: string;
       three_pointers_per_game: string;
       minutes_played_per_game: string;
+      player_efficiency_rating?: string; // add ? if not always present initially
+      usage_rate?: string;
+      box_plus_minus?: string;
     }[] = [];
 
     $('#per_game_stats tbody tr')
@@ -144,9 +147,10 @@ async function scrapeData() {
     }
 
     filteredPlayers = filteredPlayers.slice(0, 400);
-    // for (const player of filteredPlayers) {
-    //   console.log(player);
-    // }
+    const newMap = new Map<string, (typeof players)[0]>();
+    for (const player of filteredPlayers) {
+      newMap.set(player.player_name, { ...player });
+    }
 
     // const firstRow = $('#per_game_stats tbody tr').first();
     // console.log(firstRow.html());
@@ -161,7 +165,7 @@ async function scrapeData() {
         .first()
         .text()
         .trim();
-      const player_efficiency_Rating = $(row)
+      const player_efficiency_rating = $(row)
         .find('td[data-stat="per"]')
         .first()
         .text()
@@ -178,13 +182,22 @@ async function scrapeData() {
         .trim();
       console.log({
         player_name,
-        player_efficiency_Rating,
+        player_efficiency_rating,
         usage_rate,
-        box_plus_minus
-      })
+        box_plus_minus,
+      });
+
+      const playerObj = newMap.get(player_name);
+      if (playerObj) {
+        Object.assign(playerObj, {
+          player_efficiency_rating: emptyToZeroString(player_efficiency_rating),
+          usage_rate: emptyToZeroString(usage_rate),
+          box_plus_minus: emptyToZeroString(box_plus_minus),
+        });
+      }
     });
-    const firstRow = $('.stats_table tbody tr').first();
-    console.log(firstRow.html());
+    const mergedPlayers = Array.from(newMap.values());
+    console.log(mergedPlayers)
 
     // const { error: deleteError } = await supabase
     //   .from('Players')
