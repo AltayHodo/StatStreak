@@ -6,6 +6,8 @@ async function scrapeData() {
     'https://www.basketball-reference.com/leagues/NBA_2025_per_game.html';
   const ADVANCED_URL =
     'https://www.basketball-reference.com/leagues/NBA_2025_advanced.html';
+  const TOTALS_URL =
+    'https://www.basketball-reference.com/leagues/NBA_2025_totals.html';
 
   try {
     let response = await fetch(PER_GAME_URL);
@@ -30,6 +32,16 @@ async function scrapeData() {
       player_efficiency_rating?: string; // add ? if not always present initially
       usage_rate?: string;
       box_plus_minus?: string;
+      total_minutes_played?: string;
+      total_points?: string;
+      total_rebounds?: string;
+      total_assists?: string;
+      total_field_goals?: string;
+      total_three_pointers?: string;
+      total_steals?: string;
+      total_blocks?: string;
+      total_turnovers?: string;
+      triple_doubles?: string;
     }[] = [];
 
     $('#per_game_stats tbody tr')
@@ -151,7 +163,7 @@ async function scrapeData() {
     for (const player of filteredPlayers) {
       newMap.set(player.player_name, { ...player });
     }
-
+ 
     // const firstRow = $('#per_game_stats tbody tr').first();
     // console.log(firstRow.html());
 
@@ -180,12 +192,12 @@ async function scrapeData() {
         .first()
         .text()
         .trim();
-      console.log({
-        player_name,
-        player_efficiency_rating,
-        usage_rate,
-        box_plus_minus,
-      });
+      // console.log({
+      //   player_name,
+      //   player_efficiency_rating,
+      //   usage_rate,
+      //   box_plus_minus,
+      // });
 
       const playerObj = newMap.get(player_name);
       if (playerObj) {
@@ -196,25 +208,121 @@ async function scrapeData() {
         });
       }
     });
+
+    response = await fetch(TOTALS_URL);
+    html = await response.text();
+    $ = cheerio.load(html);
+
+    // const firstRow = $('.stats_table tbody tr').first();
+    // console.log(firstRow.html());
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    $('.stats_table tbody tr').each((_: number, row: any) => {
+      const player_name = $(row)
+        .find('td[data-stat="name_display"] a')
+        .first()
+        .text()
+        .trim();
+      const total_minutes_played = $(row)
+        .find('td[data-stat="mp"]')
+        .first()
+        .text()
+        .trim();
+      const total_points = $(row)
+        .find('td[data-stat="pts"]')
+        .first()
+        .text()
+        .trim();
+      const total_field_goals = $(row)
+        .find('td[data-stat="fg"]')
+        .first()
+        .text()
+        .trim();
+      const total_three_pointers = $(row)
+        .find('td[data-stat="fg3"]')
+        .first()
+        .text()
+        .trim();
+      const total_rebounds = $(row)
+        .find('td[data-stat="trb"]')
+        .first()
+        .text()
+        .trim();
+      const total_assists = $(row)
+        .find('td[data-stat="ast"]')
+        .first()
+        .text()
+        .trim();
+      const total_steals = $(row)
+        .find('td[data-stat="stl"]')
+        .first()
+        .text()
+        .trim();
+      const total_blocks = $(row)
+        .find('td[data-stat="blk"]')
+        .first()
+        .text()
+        .trim();
+      const total_turnovers = $(row)
+        .find('td[data-stat="tov"]')
+        .first()
+        .text()
+        .trim();
+      const triple_doubles = $(row)
+        .find('td[data-stat="tpl_dbl"]')
+        .first()
+        .text()
+        .trim();
+      // console.log({
+      //   player_name,
+      //   total_field_goals,
+      //   total_minutes_played,
+      //   total_points,
+      //   total_three_pointers,
+      //   total_assists,
+      //   total_rebounds,
+      //   total_steals,
+      //   total_blocks,
+      //   total_turnovers,
+      //   triple_doubles,
+      // })
+
+      const playerObj = newMap.get(player_name);
+      if (playerObj) {
+        Object.assign(playerObj, {
+          total_minutes_played: emptyToZeroString(total_minutes_played),
+          total_points: emptyToZeroString(total_points),
+          total_rebounds: emptyToZeroString(total_rebounds),
+          total_assists: emptyToZeroString(total_assists),
+          total_field_goals: emptyToZeroString(total_field_goals),
+          total_three_pointers: emptyToZeroString(total_three_pointers),
+          total_steals: emptyToZeroString(total_steals),
+          total_blocks: emptyToZeroString(total_blocks),
+          total_turnovers: emptyToZeroString(total_turnovers),
+          triple_doubles: emptyToZeroString(triple_doubles),
+        });
+      }
+    });
+
     const mergedPlayers = Array.from(newMap.values());
-    console.log(mergedPlayers)
+    // console.log(mergedPlayers);
 
-    // const { error: deleteError } = await supabase
-    //   .from('Players')
-    //   .delete()
-    //   .neq('id', 0);
-    // if (deleteError) {
-    //   console.error('Error clearing Players table:', deleteError);
-    // }
-    // const { data, error } = await supabase
-    //   .from('Players')
-    //   .insert(filteredPlayers);
+    const { error: deleteError } = await supabase
+      .from('Players')
+      .delete()
+      .neq('id', 0);
+    if (deleteError) {
+      console.error('Error clearing Players table:', deleteError);
+    }
+    const { data, error } = await supabase
+      .from('Players')
+      .insert(mergedPlayers);
 
-    // if (error) {
-    //   console.error('Supabase insert error:', error);
-    // } else {
-    //   console.log('Inserted players:', data);
-    // }
+    if (error) {
+      console.error('Supabase insert error:', error);
+    } else {
+      console.log('Inserted players:', data);
+    }
   } catch (error) {
     console.error('Error scraping data:', error);
   }
