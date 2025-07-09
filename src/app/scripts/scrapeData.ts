@@ -10,10 +10,6 @@ async function scrapeData() {
     'https://www.basketball-reference.com/leagues/NBA_2025_totals.html';
 
   try {
-    let response = await fetch(PER_GAME_URL);
-    let html = await response.text();
-    let $ = cheerio.load(html);
-
     const players: {
       player_name: string;
       team_name: string;
@@ -43,6 +39,10 @@ async function scrapeData() {
       total_turnovers?: string;
       triple_doubles?: string;
     }[] = [];
+
+    let response = await fetch(PER_GAME_URL);
+    let html = await response.text();
+    let $ = cheerio.load(html);
 
     $('#per_game_stats tbody tr')
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -138,6 +138,7 @@ async function scrapeData() {
         });
       });
 
+    // map name -> list of player object (for players on multiple teams, who were traded)
     const playerMap = new Map<string, (typeof players)[0][]>();
     for (const row of players) {
       if (!playerMap.has(row.player_name)) playerMap.set(row.player_name, []);
@@ -159,11 +160,12 @@ async function scrapeData() {
     }
 
     filteredPlayers = filteredPlayers.slice(0, 400);
+    // map player name -> player object
     const newMap = new Map<string, (typeof players)[0]>();
     for (const player of filteredPlayers) {
       newMap.set(player.player_name, { ...player });
     }
- 
+
     // const firstRow = $('#per_game_stats tbody tr').first();
     // console.log(firstRow.html());
 
@@ -171,55 +173,65 @@ async function scrapeData() {
     html = await response.text();
     $ = cheerio.load(html);
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    $('.stats_table tbody tr').each((_: number, row: any) => {
-      const player_name = $(row)
-        .find('td[data-stat="name_display"] a')
-        .first()
-        .text()
-        .trim();
-      const player_efficiency_rating = $(row)
-        .find('td[data-stat="per"]')
-        .first()
-        .text()
-        .trim();
-      const usage_rate = $(row)
-        .find('td[data-stat="usg_pct"]')
-        .first()
-        .text()
-        .trim();
-      const box_plus_minus = $(row)
-        .find('td[data-stat="bpm"]')
-        .first()
-        .text()
-        .trim();
-      // console.log({
-      //   player_name,
-      //   player_efficiency_rating,
-      //   usage_rate,
-      //   box_plus_minus,
-      // });
+    // $('.stats_table tbody tr').each((_: number, row: any) => {
+    //   const player_name = $(row)
+    //     .find('td[data-stat="name_display"] a')
+    //     .first()
+    //     .text()
+    //     .trim();
+    //   const player_efficiency_rating = $(row)
+    //     .find('td[data-stat="per"]')
+    //     .first()
+    //     .text()
+    //     .trim();
+    //   const usage_rate = $(row)
+    //     .find('td[data-stat="usg_pct"]')
+    //     .first()
+    //     .text()
+    //     .trim();
+    //   const box_plus_minus = $(row)
+    //     .find('td[data-stat="bpm"]')
+    //     .first()
+    //     .text()
+    //     .trim();
 
-      const playerObj = newMap.get(player_name);
-      if (playerObj) {
-        Object.assign(playerObj, {
-          player_efficiency_rating: emptyToZeroString(player_efficiency_rating),
-          usage_rate: emptyToZeroString(usage_rate),
-          box_plus_minus: emptyToZeroString(box_plus_minus),
-        });
-      }
-    });
+    //   const playerObj = newMap.get(player_name);
+    //   if (playerObj) {
+    //     Object.assign(playerObj, {
+    //       player_efficiency_rating: emptyToZeroString(player_efficiency_rating),
+    //       usage_rate: emptyToZeroString(usage_rate),
+    //       box_plus_minus: emptyToZeroString(box_plus_minus),
+    //     });
+    //   }
+    // });
 
     response = await fetch(TOTALS_URL);
     html = await response.text();
     $ = cheerio.load(html);
 
-    // const firstRow = $('.stats_table tbody tr').first();
-    // console.log(firstRow.html());
-
+    let totalStats: {
+      player_name: string;
+      team_name: string;
+      total_minutes_played: string;
+      total_points: string;
+      total_field_goals: string;
+      total_three_pointers: string;
+      total_rebounds: string;
+      total_assists: string;
+      total_steals: string;
+      total_blocks: string;
+      total_turnovers: string;
+      triple_doubles: string;
+    }[] = [];
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     $('.stats_table tbody tr').each((_: number, row: any) => {
       const player_name = $(row)
         .find('td[data-stat="name_display"] a')
+        .first()
+        .text()
+        .trim();
+      const team_name = $(row)
+        .find('td[data-stat="team_name_abbr"] a')
         .first()
         .text()
         .trim();
@@ -273,39 +285,78 @@ async function scrapeData() {
         .first()
         .text()
         .trim();
-      // console.log({
-      //   player_name,
-      //   total_field_goals,
-      //   total_minutes_played,
-      //   total_points,
-      //   total_three_pointers,
-      //   total_assists,
-      //   total_rebounds,
-      //   total_steals,
-      //   total_blocks,
-      //   total_turnovers,
-      //   triple_doubles,
-      // })
 
-      const playerObj = newMap.get(player_name);
-      if (playerObj) {
-        Object.assign(playerObj, {
-          total_minutes_played: emptyToZeroString(total_minutes_played),
-          total_points: emptyToZeroString(total_points),
-          total_rebounds: emptyToZeroString(total_rebounds),
-          total_assists: emptyToZeroString(total_assists),
-          total_field_goals: emptyToZeroString(total_field_goals),
-          total_three_pointers: emptyToZeroString(total_three_pointers),
-          total_steals: emptyToZeroString(total_steals),
-          total_blocks: emptyToZeroString(total_blocks),
-          total_turnovers: emptyToZeroString(total_turnovers),
-          triple_doubles: emptyToZeroString(triple_doubles),
-        });
-      }
+      if (!player_name) return;
+
+      totalStats.push({
+        player_name,
+        team_name,
+        total_minutes_played: emptyToZeroString(total_minutes_played),
+        total_points: emptyToZeroString(total_points),
+        total_field_goals: emptyToZeroString(total_field_goals),
+        total_three_pointers: emptyToZeroString(total_three_pointers),
+        total_rebounds: emptyToZeroString(total_rebounds),
+        total_assists: emptyToZeroString(total_assists),
+        total_steals: emptyToZeroString(total_steals),
+        total_blocks: emptyToZeroString(total_blocks),
+        total_turnovers: emptyToZeroString(total_turnovers),
+        triple_doubles: emptyToZeroString(triple_doubles),
+      });
     });
 
+    totalStats = totalStats.slice(0, 735);
+
+    console.log('totalStats array', totalStats.reverse());
+
+    // Filter totalStats: handle traded players (same logic as filteredPlayers)
+    const totalsPlayerMap = new Map<string, (typeof totalStats)[0][]>();
+    for (const row of totalStats) {
+      // console.log(row.player_name)
+      if (!totalsPlayerMap.has(row.player_name)) {
+        totalsPlayerMap.set(row.player_name, []);
+      }
+      totalsPlayerMap.get(row.player_name)!.push({ ...row });
+    }
+
+    // console.log('totalsPlayerMap', totalsPlayerMap);
+
+    // Filter: keep only the total row, but set teamName to last team row
+    const filteredTotalStats = [];
+    for (const [, rows] of totalsPlayerMap.entries()) {
+      const totalRow = rows.find((r) => !r.team_name);
+      const lastTeamRow = [...rows].reverse().find((r) => r.team_name);
+      if (totalRow && lastTeamRow) {
+        totalRow.team_name = lastTeamRow.team_name;
+        filteredTotalStats.push(totalRow);
+      } else if (rows.length) {
+        // If no total row, just use the last row
+        filteredTotalStats.push(rows[rows.length - 1]);
+      }
+    }
+
+    console.log('filteredTotalStats array', filteredTotalStats);
+
+    for (const totalStat of filteredTotalStats) {
+      const playerObj = newMap.get(totalStat.player_name);
+      if (playerObj) {
+        Object.assign(playerObj, {
+          total_minutes_played: totalStat.total_minutes_played,
+          total_points: totalStat.total_points,
+          total_rebounds: totalStat.total_rebounds,
+          total_assists: totalStat.total_assists,
+          total_field_goals: totalStat.total_field_goals,
+          total_three_pointers: totalStat.total_three_pointers,
+          total_steals: totalStat.total_steals,
+          total_blocks: totalStat.total_blocks,
+          total_turnovers: totalStat.total_turnovers,
+          triple_doubles: totalStat.triple_doubles,
+        });
+        // console.log('Merged player object:', playerObj);
+      }
+    }
+
     const mergedPlayers = Array.from(newMap.values());
-    // console.log(mergedPlayers);
+    // console.log("merged players", mergedPlayers);
 
     const { error: deleteError } = await supabase
       .from('Players')
