@@ -169,42 +169,6 @@ async function scrapeData() {
     // const firstRow = $('#per_game_stats tbody tr').first();
     // console.log(firstRow.html());
 
-    response = await fetch(ADVANCED_URL);
-    html = await response.text();
-    $ = cheerio.load(html);
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    // $('.stats_table tbody tr').each((_: number, row: any) => {
-    //   const player_name = $(row)
-    //     .find('td[data-stat="name_display"] a')
-    //     .first()
-    //     .text()
-    //     .trim();
-    //   const player_efficiency_rating = $(row)
-    //     .find('td[data-stat="per"]')
-    //     .first()
-    //     .text()
-    //     .trim();
-    //   const usage_rate = $(row)
-    //     .find('td[data-stat="usg_pct"]')
-    //     .first()
-    //     .text()
-    //     .trim();
-    //   const box_plus_minus = $(row)
-    //     .find('td[data-stat="bpm"]')
-    //     .first()
-    //     .text()
-    //     .trim();
-
-    //   const playerObj = newMap.get(player_name);
-    //   if (playerObj) {
-    //     Object.assign(playerObj, {
-    //       player_efficiency_rating: emptyToZeroString(player_efficiency_rating),
-    //       usage_rate: emptyToZeroString(usage_rate),
-    //       box_plus_minus: emptyToZeroString(box_plus_minus),
-    //     });
-    //   }
-    // });
-
     response = await fetch(TOTALS_URL);
     html = await response.text();
     $ = cheerio.load(html);
@@ -303,22 +267,16 @@ async function scrapeData() {
         triple_doubles: emptyToZeroString(triple_doubles),
       });
     });
-
     totalStats = totalStats.slice(0, 735);
-
-    console.log('totalStats array', totalStats.reverse());
 
     // Filter totalStats: handle traded players (same logic as filteredPlayers)
     const totalsPlayerMap = new Map<string, (typeof totalStats)[0][]>();
     for (const row of totalStats) {
-      // console.log(row.player_name)
       if (!totalsPlayerMap.has(row.player_name)) {
         totalsPlayerMap.set(row.player_name, []);
       }
       totalsPlayerMap.get(row.player_name)!.push({ ...row });
     }
-
-    // console.log('totalsPlayerMap', totalsPlayerMap);
 
     // Filter: keep only the total row, but set teamName to last team row
     const filteredTotalStats = [];
@@ -333,8 +291,6 @@ async function scrapeData() {
         filteredTotalStats.push(rows[rows.length - 1]);
       }
     }
-
-    console.log('filteredTotalStats array', filteredTotalStats);
 
     for (const totalStat of filteredTotalStats) {
       const playerObj = newMap.get(totalStat.player_name);
@@ -351,12 +307,91 @@ async function scrapeData() {
           total_turnovers: totalStat.total_turnovers,
           triple_doubles: totalStat.triple_doubles,
         });
-        // console.log('Merged player object:', playerObj);
+      }
+    }
+
+    response = await fetch(ADVANCED_URL);
+    html = await response.text();
+    $ = cheerio.load(html);
+    let advancedStats: {
+      player_name: string;
+      team_name: string;
+      player_efficiency_rating: string;
+      usage_rate: string;
+      box_plus_minus: string;
+    }[] = [];
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    $('.stats_table tbody tr').each((_: number, row: any) => {
+      const player_name = $(row)
+        .find('td[data-stat="name_display"] a')
+        .first()
+        .text()
+        .trim();
+      const team_name = $(row)
+        .find('td[data-stat="team_name_abbr"] a')
+        .first()
+        .text()
+        .trim();
+      const player_efficiency_rating = $(row)
+        .find('td[data-stat="per"]')
+        .first()
+        .text()
+        .trim();
+      const usage_rate = $(row)
+        .find('td[data-stat="usg_pct"]')
+        .first()
+        .text()
+        .trim();
+      const box_plus_minus = $(row)
+        .find('td[data-stat="bpm"]')
+        .first()
+        .text()
+        .trim();
+
+      advancedStats.push({
+        player_name: emptyToZeroString(player_name),
+        team_name: emptyToZeroString(team_name),
+        player_efficiency_rating: emptyToZeroString(player_efficiency_rating),
+        usage_rate: emptyToZeroString(usage_rate),
+        box_plus_minus: emptyToZeroString(box_plus_minus),
+      });
+    });
+
+    advancedStats = advancedStats.slice(0, 735);
+    const advancedPlayerMap = new Map<string, (typeof advancedStats)[0][]>();
+    for (const row of advancedStats) {
+      if (!advancedPlayerMap.has(row.player_name)) {
+        advancedPlayerMap.set(row.player_name, []);
+      }
+      advancedPlayerMap.get(row.player_name)!.push({ ...row });
+    }
+
+    const filteredAdvancedStats = [];
+    for (const [, rows] of advancedPlayerMap.entries()) {
+      const totalRow = rows.find((r) => !r.team_name);
+      const lastTeamRow = [...rows].reverse().find((r) => r.team_name);
+      if (totalRow && lastTeamRow) {
+        totalRow.team_name = lastTeamRow.team_name;
+        filteredAdvancedStats.push(totalRow);
+      } else if (rows.length) {
+        // If no total row, just use the last row
+        filteredAdvancedStats.push(rows[rows.length - 1]);
+      }
+    }
+
+    for (const advancedStat of filteredAdvancedStats) {
+      const playerObj = newMap.get(advancedStat.player_name);
+      if (playerObj) {
+        Object.assign(playerObj, {
+          player_efficiency_rating: advancedStat.player_efficiency_rating,
+          usage_rate: advancedStat.usage_rate,
+          box_plus_minus: advancedStat.box_plus_minus,
+        });
       }
     }
 
     const mergedPlayers = Array.from(newMap.values());
-    // console.log("merged players", mergedPlayers);
+    console.log("merged players", mergedPlayers);
 
     const { error: deleteError } = await supabase
       .from('Players')
