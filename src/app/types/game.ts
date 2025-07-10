@@ -4,7 +4,7 @@ export interface DailyGame {
   id: string;
   game_date: string;
   selected_players: Player[];
-  selected_stats: StatCategory[];
+  selected_categories: StatCategory[];
 }
 
 export interface StatCategory {
