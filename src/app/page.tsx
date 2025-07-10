@@ -1,11 +1,23 @@
-import { supabase } from "./utils/supabaseClient";
+import { supabase } from './utils/supabaseClient';
+import { generateDailyGame } from './lib/gameGenerator';
+import GameBoard from './components/GameBoard';
 
 export default async function Home() {
-  const { data } = await supabase.from('Players').select('*');
-  console.log(data)
+  const today = new Date().toISOString().split('T')[0];
+
+  let { data: todaysGame } = await supabase
+    .from('Games')
+    .select('*')
+    .eq('game_date', today)
+    .single();
+
+  if (!todaysGame) {
+    todaysGame = await generateDailyGame(today);
+  }
+
   return (
     <div>
-      home 
+      <GameBoard game={todaysGame} />
     </div>
   );
 }
