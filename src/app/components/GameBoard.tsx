@@ -59,23 +59,34 @@ export default function GameBoard({ game }: GameboardProps) {
 
     const sorted = playerStats.sort((a, b) => b.value - a.value);
 
+    const highestValue = sorted[0].value;
+    const correctPlayers = sorted.filter(
+      (player) => player.value === highestValue
+    );
+
     return {
-      correctPlayer: sorted[0],
+      correctPlayers,
+      highestValue,
       allStats: sorted,
     };
   };
 
   const calculateResults = (): GameResult[] => {
     return game.selected_categories.map((category) => {
-      const { correctPlayer, allStats } = findHighestPlayer(category.key);
+      const { correctPlayers, allStats } = findHighestPlayer(category.key);
       const userSelection = selections[category.key];
+
+      const isCorrect = correctPlayers.some(
+        (player) => player.playerName === userSelection
+      );
 
       return {
         category: category.display_name,
         userSelection,
-        correctAnswer: correctPlayer.playerName,
-        isCorrect: userSelection === correctPlayer.playerName,
+        correctAnswer: correctPlayers.map((p) => p.playerName).join(' / '),
+        isCorrect,
         playerStats: allStats,
+        correctPlayers,
       };
     });
   };
@@ -167,9 +178,15 @@ export default function GameBoard({ game }: GameboardProps) {
                     Your pick: <strong>{result.userSelection}</strong>
                     {result.isCorrect ? ' ✅' : ' ❌'}
                   </p>
+
                   {!result.isCorrect && (
                     <p>
-                      Correct answer: <strong>{result.correctAnswer}</strong>
+                      Correct answer
+                      {result.correctPlayers.length > 1 ? 's' : ''}:
+                      <strong> {result.correctAnswer}</strong>
+                      {result.correctPlayers.length > 1 && (
+                        <span className="text-sm text-gray-600"> (tied)</span>
+                      )}
                     </p>
                   )}
 
@@ -178,8 +195,22 @@ export default function GameBoard({ game }: GameboardProps) {
                     <summary>View all stats</summary>
                     <ul className="mt-2">
                       {result.playerStats.map((stat) => (
-                        <li key={stat.playerName}>
+                        <li
+                          key={stat.playerName}
+                          className={
+                            result.correctPlayers.some(
+                              (cp) => cp.playerName === stat.playerName
+                            )
+                              ? 'font-bold text-green-600' // Highlight tied winners
+                              : ''
+                          }
+                        >
                           {stat.playerName}: {stat.value}
+                          {result.correctPlayers.some(
+                            (cp) => cp.playerName === stat.playerName
+                          ) &&
+                            result.correctPlayers.length > 1 &&
+                            ' (tied for 1st)'}
                         </li>
                       ))}
                     </ul>

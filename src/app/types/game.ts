@@ -26,4 +26,5 @@ export type GameResult = {
   correctAnswer: string;
   isCorrect: boolean;
   playerStats: { playerName: string; value: number}[];
+  correctPlayers: { playerName: string; value: number }[];
 }
