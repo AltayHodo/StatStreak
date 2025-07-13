@@ -364,24 +364,24 @@ async function scrapeData() {
     }
 
     const mergedPlayers = Array.from(newMap.values());
-    console.log('merged players', mergedPlayers);
+    getESPNPlayerIds(mergedPlayers);
 
-    const { error: deleteError } = await supabase
-      .from('Players')
-      .delete()
-      .neq('id', 0);
-    if (deleteError) {
-      console.error('Error clearing Players table:', deleteError);
-    }
-    const { data, error } = await supabase
-      .from('Players')
-      .insert(mergedPlayers);
+    // const { error: deleteError } = await supabase
+    //   .from('Players')
+    //   .delete()
+    //   .neq('id', 0);
+    // if (deleteError) {
+    //   console.error('Error clearing Players table:', deleteError);
+    // }
+    // const { data, error } = await supabase
+    //   .from('Players')
+    //   .insert(mergedPlayers);
 
-    if (error) {
-      console.error('Supabase insert error:', error);
-    } else {
-      console.log('Inserted players:', data);
-    }
+    // if (error) {
+    //   console.error('Supabase insert error:', error);
+    // } else {
+    //   console.log('Inserted players:', data);
+    // }
   } catch (error) {
     console.error('Error scraping data:', error);
   }
@@ -392,3 +392,131 @@ function emptyToZeroString(value: string): string {
 }
 
 scrapeData();
+
+async function getESPNPlayerIds(mergedPlayers: Player[]) {
+  //don't forget- accents in player names messing things up
+  const playerIdMap = new Map<string, string>();
+
+  const espnTeamMap: Record<string, string> = {
+    ATL: 'atl/atlanta-hawks',
+    BOS: 'bos/boston-celtics',
+    BRK: 'bkn/brooklyn-nets',
+    CHO: 'cha/charlotte-hornets',
+    CHI: 'chi/chicago-bulls',
+    CLE: 'cle/cleveland-cavaliers',
+    DAL: 'dal/dallas-mavericks',
+    DEN: 'den/denver-nuggets',
+    DET: 'det/detroit-pistons',
+    GSW: 'gs/golden-state-warriors',
+    HOU: 'hou/houston-rockets',
+    IND: 'ind/indiana-pacers',
+    LAC: 'lac/la-clippers',
+    LAL: 'lal/los-angeles-lakers',
+    MEM: 'mem/memphis-grizzlies',
+    MIA: 'mia/miami-heat',
+    MIL: 'mil/milwaukee-bucks',
+    MIN: 'min/minnesota-timberwolves',
+    NOP: 'no/new-orleans-pelicans',
+    NYK: 'ny/new-york-knicks',
+    OKC: 'okc/oklahoma-city-thunder',
+    ORL: 'orl/orlando-magic',
+    PHI: 'phi/philadelphia-76ers',
+    PHO: 'phx/phoenix-suns',
+    POR: 'por/portland-trail-blazers',
+    SAC: 'sac/sacramento-kings',
+    SAS: 'sa/san-antonio-spurs',
+    TOR: 'tor/toronto-raptors',
+    UTA: 'utah/utah-jazz',
+    WAS: 'wsh/washington-wizards',
+  };
+
+  const playersByTeam = new Map<string, Player[]>();
+  for (const player of mergedPlayers) {
+    const teamKey = player.team_name;
+    if (!playersByTeam.has(teamKey)) {
+      playersByTeam.set(teamKey, []);
+    }
+    playersByTeam.get(teamKey)!.push(player);
+  }
+
+  for (const [teamAbbr, teamPlayers] of playersByTeam) {
+    const espnTeam = espnTeamMap[teamAbbr];
+    if (!espnTeam) {
+      console.log(`No ESPN mapping for team: ${teamAbbr}`);
+      continue;
+    }
+
+    try {
+      console.log(`Processing team: ${teamAbbr} (${espnTeam})`);
+      const rosterUrl = `https://www.espn.com/nba/team/roster/_/name/${espnTeam}`;
+      const response = await fetch(rosterUrl);
+      const html = await response.text();
+      const $ = cheerio.load(html);
+
+      $('.Roster__MixedTable .flex .Table__TBODY tr').each(
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        (_: number, row: any) => {
+          const athleteLink = $(row).find('a[data-resource-id="AthleteName"]');
+          if (athleteLink.length > 0) {
+            const href = athleteLink.attr('href');
+            const playerName = athleteLink.text().trim();
+
+            if (href) {
+              const match = href.match(/\/id\/(\d+)\//);
+
+              if (match) {
+                const playerId = match[1];
+
+                const matchingPlayer = mergedPlayers.find((p) => {
+                  const normalizedBRName = p.player_name
+                    .toLowerCase()
+                    .replace(/[àáâãäå]/g, 'a')
+                    .replace(/[èéêë]/g, 'e')
+                    .replace(/[ìíîï]/g, 'i')
+                    .replace(/[òóôõö]/g, 'o')
+                    .replace(/[ùúûü]/g, 'u')
+                    .replace(/[ñ]/g, 'n')
+                    .replace(/[ç]/g, 'c')
+                    .replace(/[^a-z\s]/g, '')
+                    .trim();
+
+                  const normalizedESPNName = playerName
+                    .toLowerCase()
+                    .replace(/[àáâãäå]/g, 'a')
+                    .replace(/[èéêë]/g, 'e')
+                    .replace(/[ìíîï]/g, 'i')
+                    .replace(/[òóôõö]/g, 'o')
+                    .replace(/[ùúûü]/g, 'u')
+                    .replace(/[ñ]/g, 'n')
+                    .replace(/[ç]/g, 'c')
+                    .replace(/[^a-z\s]/g, '')
+                    .trim();
+
+                  return (
+                    normalizedBRName.includes(normalizedESPNName) ||
+                    normalizedESPNName.includes(normalizedBRName) ||
+                    normalizedBRName === normalizedESPNName
+                  );
+                });
+
+                if (matchingPlayer) {
+                  playerIdMap.set(matchingPlayer.player_name, playerId);
+                  console.log(
+                    `Mapped: ${matchingPlayer.player_name} -> ${playerId}`
+                  );
+                } else {
+                  console.log(`No match found for ESPN player: ${playerName}`);
+                }
+              }
+            }
+          }
+        }
+      );
+      await new Promise((resolve) => setTimeout(resolve, 500));
+    } catch (error) {
+      console.error(`Error processing team ${teamAbbr}:`, error);
+    }
+  }
+  console.log(`\nTotal player IDs mapped: ${playerIdMap.size}`);
+  return playerIdMap;
+}
