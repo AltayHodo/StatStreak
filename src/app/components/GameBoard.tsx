@@ -2,6 +2,7 @@
 
 import { DailyGame, GameResult } from '../types/game';
 import { useState } from 'react';
+import Image from 'next/image';
 
 type GameboardProps = {
   game: DailyGame;
@@ -112,10 +113,9 @@ export default function GameBoard({ game }: GameboardProps) {
         </thead>
 
         <tbody>
-          {game.selected_categories.map((category, rowIndex) => (
+          {game.selected_categories.map(category => (
             <tr
               key={category.key}
-              className={rowIndex % 2 === 0 ? 'bg-gray-50' : 'bg-white'}
             >
               <td>{category.display_name}</td>
 
@@ -136,13 +136,54 @@ export default function GameBoard({ game }: GameboardProps) {
                           isSelected
                             ? 'bg-green-500 text-white'
                             : categoryHasSelection
-                            ? 'bg-gray-200 text-gray-400 hover:bg-gray-300'
+                            ? 'bg-gray-200 text-gray-400 hover:bg-gray-300 opacity-50'
                             : 'bg-white text-gray-700'
                         }
-                        ${submitted && 'opacity-60'}
+                        ${submitted ? 'opacity-60' : 'cursor-pointer'}
+                        ${
+                          !submitted && !categoryHasSelection
+                            ? 'hover:scale-105'
+                            : ''
+                        }
                         `}
                     >
-                      {isSelected ? 'Selected' : 'Select'}
+                      {player.image_url ? (
+                        <img
+                          src={player.image_url}
+                          alt={player.player_name}
+                          className={`
+                            w-20 h-20 object-cover
+                          ${isSelected ? 'border-white' : 'border-gray-300'}
+                          `}
+                        />
+                      ) : null}
+
+                      <div
+                        className={`
+                  w-12 h-12 rounded-full flex items-center justify-center font-bold text-xs
+                  ${
+                    isSelected
+                      ? 'bg-white text-green-600'
+                      : 'bg-gray-300 text-gray-600'
+                  }
+                  ${player.image_url ? 'hidden' : 'flex'}
+                `}
+                      >
+                        {player.player_name
+                          .split(' ')
+                          .map((name) => name[0])
+                          .join('')}
+                      </div>
+
+                      {/* Player Name */}
+                      <span
+                        className={`
+                text-xs font-medium mt-1 text-center leading-tight
+                ${isSelected ? 'text-white' : 'text-gray-700'}
+              `}
+                      >
+                        {player.player_name}
+                      </span>
                     </button>
                   </td>
                 );
