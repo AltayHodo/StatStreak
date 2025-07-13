@@ -27,6 +27,7 @@ export type Player = {
   total_blocks?: string;
   total_turnovers?: string;
   triple_doubles?: string;
+  image_url?: string;
 }
 
 export type StatCategory = {

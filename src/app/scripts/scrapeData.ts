@@ -364,24 +364,28 @@ async function scrapeData() {
     }
 
     const mergedPlayers = Array.from(newMap.values());
-    getESPNPlayerIds(mergedPlayers);
+    const playerIdMap = await getESPNPlayerIds(mergedPlayers);
+    const playersWithImages = await scrapeESPNPlayerImages(
+      playerIdMap,
+      mergedPlayers
+    );
 
-    // const { error: deleteError } = await supabase
-    //   .from('Players')
-    //   .delete()
-    //   .neq('id', 0);
-    // if (deleteError) {
-    //   console.error('Error clearing Players table:', deleteError);
-    // }
-    // const { data, error } = await supabase
-    //   .from('Players')
-    //   .insert(mergedPlayers);
+    const { error: deleteError } = await supabase
+      .from('Players')
+      .delete()
+      .neq('id', 0);
+    if (deleteError) {
+      console.error('Error clearing Players table:', deleteError);
+    }
+    const { data, error } = await supabase
+      .from('Players')
+      .insert(playersWithImages);
 
-    // if (error) {
-    //   console.error('Supabase insert error:', error);
-    // } else {
-    //   console.log('Inserted players:', data);
-    // }
+    if (error) {
+      console.error('Supabase insert error:', error);
+    } else {
+      console.log('Inserted players:', data);
+    }
   } catch (error) {
     console.error('Error scraping data:', error);
   }
@@ -439,7 +443,7 @@ async function getESPNPlayerIds(mergedPlayers: Player[]) {
     playersByTeam.get(teamKey)!.push(player);
   }
 
-  for (const [teamAbbr, teamPlayers] of playersByTeam) {
+  for (const [teamAbbr] of playersByTeam) {
     const espnTeam = espnTeamMap[teamAbbr];
     if (!espnTeam) {
       console.log(`No ESPN mapping for team: ${teamAbbr}`);
@@ -468,29 +472,8 @@ async function getESPNPlayerIds(mergedPlayers: Player[]) {
                 const playerId = match[1];
 
                 const matchingPlayer = mergedPlayers.find((p) => {
-                  const normalizedBRName = p.player_name
-                    .toLowerCase()
-                    .replace(/[àáâãäå]/g, 'a')
-                    .replace(/[èéêë]/g, 'e')
-                    .replace(/[ìíîï]/g, 'i')
-                    .replace(/[òóôõö]/g, 'o')
-                    .replace(/[ùúûü]/g, 'u')
-                    .replace(/[ñ]/g, 'n')
-                    .replace(/[ç]/g, 'c')
-                    .replace(/[^a-z\s]/g, '')
-                    .trim();
-
-                  const normalizedESPNName = playerName
-                    .toLowerCase()
-                    .replace(/[àáâãäå]/g, 'a')
-                    .replace(/[èéêë]/g, 'e')
-                    .replace(/[ìíîï]/g, 'i')
-                    .replace(/[òóôõö]/g, 'o')
-                    .replace(/[ùúûü]/g, 'u')
-                    .replace(/[ñ]/g, 'n')
-                    .replace(/[ç]/g, 'c')
-                    .replace(/[^a-z\s]/g, '')
-                    .trim();
+                  const normalizedBRName = normalizePlayerName(p.player_name);
+                  const normalizedESPNName = normalizePlayerName(playerName);
 
                   return (
                     normalizedBRName.includes(normalizedESPNName) ||
@@ -501,11 +484,6 @@ async function getESPNPlayerIds(mergedPlayers: Player[]) {
 
                 if (matchingPlayer) {
                   playerIdMap.set(matchingPlayer.player_name, playerId);
-                  console.log(
-                    `Mapped: ${matchingPlayer.player_name} -> ${playerId}`
-                  );
-                } else {
-                  console.log(`No match found for ESPN player: ${playerName}`);
                 }
               }
             }
@@ -519,4 +497,87 @@ async function getESPNPlayerIds(mergedPlayers: Player[]) {
   }
   console.log(`\nTotal player IDs mapped: ${playerIdMap.size}`);
   return playerIdMap;
+}
+
+function normalizePlayerName(name: string): string {
+  return (
+    name
+      .toLowerCase()
+      // Basic Latin accents
+      .replace(/[àáâãäåāăą]/g, 'a')
+      .replace(/[èéêëēĕė]/g, 'e')
+      .replace(/[ìíîïīĭį]/g, 'i')
+      .replace(/[òóôõöōŏő]/g, 'o')
+      .replace(/[ùúûüūŭů]/g, 'u')
+      .replace(/[ñń]/g, 'n')
+      .replace(/[ç]/g, 'c')
+      // Eastern European specific characters
+      .replace(/[č]/g, 'c') // Dončić -> Doncic
+      .replace(/[ć]/g, 'c') // Serbian/Croatian
+      .replace(/[đ]/g, 'd') // Serbian/Croatian
+      .replace(/[š]/g, 's') // Šengün -> Sengun
+      .replace(/[ž]/g, 'z') // Various Slavic
+      .replace(/[ģ]/g, 'g') // Porziņģis -> Porzingis
+      .replace(/[ņ]/g, 'n') // Porziņģis -> Porzingis
+      .replace(/[ļ]/g, 'l') // Latvian
+      .replace(/[ķ]/g, 'k') // Latvian
+      // Lithuanian specific
+      .replace(/[ū]/g, 'u') // Valančiūnas -> Valanciunas
+      .replace(/[ė]/g, 'e') // Lithuanian
+      .replace(/[į]/g, 'i') // Lithuanian
+      .replace(/[ą]/g, 'a') // Lithuanian/Polish
+      .replace(/[ę]/g, 'e') // Lithuanian/Polish
+      // Turkish specific
+      .replace(/[ğ]/g, 'g') // Turkish
+      .replace(/[ı]/g, 'i') // Turkish dotless i
+      .replace(/[İ]/g, 'i') // Turkish capital I with dot
+      .replace(/[ş]/g, 's') // Turkish
+      .replace(/[ü]/g, 'u') // Turkish
+      .replace(/[ö]/g, 'o') // Turkish
+      // Remove any remaining non-alphabetic characters except spaces
+      .replace(/[^a-z\s]/g, '')
+      .trim()
+  );
+}
+
+async function scrapeESPNPlayerImages(
+  playerIdMap: Map<string, string>,
+  mergedPlayers: Player[]
+) {
+  const playersWithImages: Player[] = [];
+  for (const player of mergedPlayers) {
+    const playerId = playerIdMap.get(player.player_name);
+
+    if (playerId) {
+      const imageUrl = `https://a.espncdn.com/i/headshots/nba/players/full/${playerId}.png`;
+
+      try {
+        const imageResponse = await fetch(imageUrl, { method: 'HEAD' });
+
+        if (imageResponse.ok) {
+          playersWithImages.push({
+            ...player,
+            image_url: imageUrl,
+          });
+          console.log(`Image found for ${player.player_name}: ${imageUrl}`);
+        } else {
+          console.log(
+            `No image available for ${player.player_name} - excluding from database`
+          );
+        }
+      } catch (error) {
+        console.error(`Error checking image for ${player.player_name}:`, error);
+        console.log(`Excluding ${player.player_name} from database`);
+      }
+      await new Promise((resolve) => setTimeout(resolve, 100));
+    } else {
+      console.log(
+        `No image available for ${player.player_name} - excluding from database`
+      );
+    }
+  }
+  console.log(
+    `\nFiltered players: ${playersWithImages.length} players with images out of ${mergedPlayers.length} total players`
+  );
+  return playersWithImages;
 }
