@@ -3,11 +3,11 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
+    "dev": "next dev & open http://localhost:3000",
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "myScript" : "npx tsx src/app/scripts/scrapeData.ts"
+    "myScript": "npx tsx src/app/scripts/scrapeData.ts"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.50.2",
@@ -26,6 +26,7 @@
     "@types/react-dom": "^19",
     "eslint": "^9",
     "eslint-config-next": "15.3.4",
+    "open-cli": "^8.0.0",
     "tailwindcss": "^4",
     "tsx": "^4.20.3",
     "typescript": "^5"
