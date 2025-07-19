@@ -99,24 +99,28 @@ export default function GameBoard({ game }: GameboardProps) {
     <div className="min-h-screen bg-gray-50">
       {/* Navigation Bar */}
       <nav className="bg-white shadow-sm border-b border-gray-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
+        <div className="max-w-7xl mx-auto px-2 sm:px-4 lg:px-8">
+          <div className="flex justify-between items-center h-12 sm:h-16">
             {/* Logo */}
             <div className="flex-shrink-0">
-              <h1 className="text-xl font-bold text-gray-900">StatStreak</h1>
+              <h1 className="text-lg sm:text-xl font-bold text-gray-900">
+                StatStreak
+              </h1>
             </div>
 
             {/* Right side - Profile and Menu */}
-            <div className="flex items-center space-x-4">
+            <div className="flex items-center space-x-2 sm:space-x-4">
               {/* Profile Photo Placeholder */}
-              <div className="w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center">
-                <span className="text-sm font-medium text-gray-600">U</span>
+              <div className="w-6 h-6 sm:w-8 sm:h-8 bg-gray-300 rounded-full flex items-center justify-center">
+                <span className="text-xs sm:text-sm font-medium text-gray-600">
+                  U
+                </span>
               </div>
 
               {/* Hamburger Menu */}
-              <button className="p-2 rounded-md text-gray-600 hover:text-gray-900 hover:bg-gray-100">
+              <button className="p-1 sm:p-2 rounded-md text-gray-600 hover:text-gray-900 hover:bg-gray-100">
                 <svg
-                  className="w-6 h-6"
+                  className="w-5 h-5 sm:w-6 sm:h-6"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -135,62 +139,68 @@ export default function GameBoard({ game }: GameboardProps) {
       </nav>
 
       {/* Main Content */}
-      <main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <main className="max-w-7xl mx-auto px-2 sm:px-4 lg:px-8 py-4 sm:py-8">
         {!submitted ? (
           <>
             {/* Game Instructions */}
-            <div className="text-center mb-8">
-              <h2 className="text-2xl font-bold text-gray-900 mb-2">
+            <div className="text-center mb-4 sm:mb-8">
+              <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-2">
                 Daily StatStreak
               </h2>
-              <p className="text-gray-600 max-w-2xl mx-auto">
+              <p className="text-sm sm:text-base text-gray-600 max-w-2xl mx-auto px-4">
                 Select which player you think has the highest value for each
                 stat category!
               </p>
             </div>
 
             {/* Game Table */}
-            <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
-              <table className="w-full table-fixed">
+            <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-x-auto">
+              <table className="w-full table-fixed min-w-max">
                 {/* Header Row */}
                 <thead>
                   <tr>
                     {/* Empty top-left cell */}
-                    <th className="bg-gray-50 border-b border-r border-gray-200 p-4 w-48"></th>
+                    <th className="bg-gray-50 border-b border-r border-gray-200 p-2 sm:p-4 w-24 sm:w-32 md:w-48 min-w-[6rem]"></th>
 
                     {/* Player Headers */}
                     {game.selected_players.map((player) => (
                       <th
                         key={player.player_name}
-                        className="bg-gray-50 border-b border-r border-gray-200 p-4 text-center w-32"
+                        className="bg-gray-50 border-b border-r border-gray-200 p-1 sm:p-2 md:p-4 text-center w-16 sm:w-20 md:w-32 min-w-[4rem] align-top"
                       >
-                        <div className="flex flex-col items-center space-y-2">
-                          {player.image_url ? (
-                            <div className="relative w-16 h-16 flex-shrink-0">
-                              <Image
-                                src={player.image_url}
-                                alt={player.player_name}
-                                fill
-                                className="object-cover rounded-full border-2 border-gray-300"
-                                onError={() => {
-                                  console.log(
-                                    `Failed to load image for ${player.player_name}`
-                                  );
-                                }}
-                              />
-                            </div>
-                          ) : (
-                            <div className="w-16 h-16 bg-gray-300 rounded-full flex items-center justify-center font-bold text-sm text-gray-600 flex-shrink-0">
-                              {player.player_name
-                                .split(' ')
-                                .map((name) => name[0])
-                                .join('')}
-                            </div>
-                          )}
+                        <div className="flex flex-col h-full">
+                          {/* Fixed height container for images */}
+                          <div className="flex justify-center items-start mb-1 sm:mb-2 h-8 sm:h-12 md:h-16">
+                            {player.image_url ? (
+                              <div className="relative w-8 h-8 sm:w-12 sm:h-12 md:w-16 md:h-16 flex-shrink-0">
+                                <Image
+                                  src={player.image_url}
+                                  alt={player.player_name}
+                                  fill
+                                  className="object-cover rounded-full border border-gray-300 sm:border-2"
+                                  onError={() => {
+                                    console.log(
+                                      `Failed to load image for ${player.player_name}`
+                                    );
+                                  }}
+                                />
+                              </div>
+                            ) : (
+                              <div className="w-8 h-8 sm:w-12 sm:h-12 md:w-16 md:h-16 bg-gray-300 rounded-full flex items-center justify-center font-bold text-xs sm:text-sm text-gray-600 flex-shrink-0">
+                                {player.player_name
+                                  .split(' ')
+                                  .map((name) => name[0])
+                                  .join('')}
+                              </div>
+                            )}
+                          </div>
 
-                          <span className="text-xs font-medium text-gray-900 text-center leading-tight break-words w-full">
-                            {player.player_name}
-                          </span>
+                          {/* Flexible height container for names */}
+                          <div className="flex-1 flex items-start justify-center">
+                            <span className="text-[10px] sm:text-xs font-medium text-gray-900 text-center leading-tight break-words w-full px-1">
+                              {player.player_name}
+                            </span>
+                          </div>
                         </div>
                       </th>
                     ))}
@@ -205,7 +215,7 @@ export default function GameBoard({ game }: GameboardProps) {
                       className={rowIndex % 2 === 0 ? 'bg-white' : 'bg-gray-50'}
                     >
                       {/* Category Label */}
-                      <td className="border-b border-r border-gray-200 p-4 font-medium text-gray-800 bg-gray-50">
+                      <td className="border-b border-r border-gray-200 p-2 sm:p-3 md:p-4 font-medium text-gray-800 bg-gray-50 text-xs sm:text-sm md:text-base leading-tight">
                         {category.display_name}
                       </td>
 
@@ -219,7 +229,7 @@ export default function GameBoard({ game }: GameboardProps) {
                           <td
                             key={`${category.key}-${player.player_name}`}
                             className={`
-                              p-3 w-32
+                              p-1 sm:p-2 md:p-3 w-16 sm:w-20 md:w-32
                               ${
                                 isSelected
                                   ? 'border-2 border-black shadow-lg'
@@ -241,7 +251,7 @@ export default function GameBoard({ game }: GameboardProps) {
                               }
                               disabled={submitted}
                               className={`
-                                w-20 h-20 rounded-lg transition-all duration-200 relative overflow-hidden mx-auto block
+                                w-12 h-12 sm:w-16 sm:h-16 md:w-20 md:h-20 rounded-lg transition-all duration-200 relative overflow-hidden mx-auto block
                                 ${
                                   isSelected
                                     ? ''
@@ -249,8 +259,16 @@ export default function GameBoard({ game }: GameboardProps) {
                                     ? 'opacity-40 grayscale hover:opacity-70'
                                     : ''
                                 }
-                                ${submitted ? 'opacity-60 cursor-not-allowed' : 'cursor-pointer'}
-                                ${!submitted && !categoryHasSelection ? 'hover:scale-105' : ''}
+                                ${
+                                  submitted
+                                    ? 'opacity-60 cursor-not-allowed'
+                                    : 'cursor-pointer'
+                                }
+                                ${
+                                  !submitted && !categoryHasSelection
+                                    ? 'hover:scale-105'
+                                    : ''
+                                }
                               `}
                             >
                               {/* Player Image - Fixed Size */}
@@ -262,7 +280,7 @@ export default function GameBoard({ game }: GameboardProps) {
                                   className="object-cover"
                                 />
                               ) : (
-                                <div className="w-full h-full bg-gray-300 flex items-center justify-center font-bold text-lg text-gray-600">
+                                <div className="w-full h-full bg-gray-300 flex items-center justify-center font-bold text-xs sm:text-sm md:text-lg text-gray-600">
                                   {player.player_name
                                     .split(' ')
                                     .map((name) => name[0])
@@ -280,10 +298,10 @@ export default function GameBoard({ game }: GameboardProps) {
             </div>
 
             {/* Submit Button */}
-            <div className="flex justify-center mt-8">
+            <div className="flex justify-center mt-4 sm:mt-8">
               <button
                 onClick={handleSubmit}
-                className="bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-8 rounded-lg transition-colors duration-200"
+                className="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 sm:py-3 sm:px-8 rounded-lg transition-colors duration-200 text-sm sm:text-base"
               >
                 Submit Answers
               </button>
@@ -293,21 +311,25 @@ export default function GameBoard({ game }: GameboardProps) {
           /* Results Section */
           <div className="max-w-4xl mx-auto">
             {/* Score Header */}
-            <div className="text-center mb-8">
-              <h2 className="text-3xl font-bold text-gray-900 mb-2">Results</h2>
-              <div className="text-6xl font-bold text-blue-600 mb-2">
+            <div className="text-center mb-6 sm:mb-8">
+              <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">
+                Results
+              </h2>
+              <div className="text-4xl sm:text-6xl font-bold text-blue-600 mb-2">
                 {calculateScore()}/{results.length}
               </div>
-              <p className="text-gray-600">Correct Predictions</p>
+              <p className="text-sm sm:text-base text-gray-600">
+                Correct Predictions
+              </p>
             </div>
 
             {/* Results Grid */}
-            <div className="space-y-4 mb-8">
+            <div className="space-y-3 sm:space-y-4 mb-6 sm:mb-8">
               {results.map((result, index) => (
                 <div
                   key={index}
                   className={`
-                    rounded-lg border-2 p-6 transition-all duration-200
+                    rounded-lg border-2 p-4 sm:p-6 transition-all duration-200
                     ${
                       result.isCorrect
                         ? 'bg-green-50 border-green-200'
@@ -315,30 +337,30 @@ export default function GameBoard({ game }: GameboardProps) {
                     }
                   `}
                 >
-                  <div className="flex items-center justify-between mb-4">
-                    <h3 className="text-lg font-semibold text-gray-900">
+                  <div className="flex items-center justify-between mb-3 sm:mb-4">
+                    <h3 className="text-base sm:text-lg font-semibold text-gray-900">
                       {result.category}
                     </h3>
-                    <span className="text-2xl">
+                    <span className="text-xl sm:text-2xl">
                       {result.isCorrect ? '✅' : '❌'}
                     </span>
                   </div>
 
                   <div className="space-y-2">
-                    <p className="text-gray-700">
+                    <p className="text-sm sm:text-base text-gray-700">
                       <span className="font-medium">Your pick:</span>{' '}
                       {result.userSelection}
                     </p>
 
                     {!result.isCorrect && (
-                      <p className="text-gray-700">
+                      <p className="text-sm sm:text-base text-gray-700">
                         <span className="font-medium">
                           Correct answer
                           {result.correctPlayers.length > 1 ? 's' : ''}:
                         </span>{' '}
                         {result.correctAnswer}
                         {result.correctPlayers.length > 1 && (
-                          <span className="text-sm text-gray-500 ml-1">
+                          <span className="text-xs sm:text-sm text-gray-500 ml-1">
                             (tied)
                           </span>
                         )}
@@ -347,17 +369,17 @@ export default function GameBoard({ game }: GameboardProps) {
                   </div>
 
                   {/* Stats Details */}
-                  <details className="mt-4">
-                    <summary className="cursor-pointer text-blue-600 hover:text-blue-800 font-medium">
+                  <details className="mt-3 sm:mt-4">
+                    <summary className="cursor-pointer text-blue-600 hover:text-blue-800 font-medium text-sm sm:text-base">
                       View all stats
                     </summary>
-                    <div className="mt-3 bg-white rounded-md p-4 border border-gray-200">
+                    <div className="mt-3 bg-white rounded-md p-3 sm:p-4 border border-gray-200">
                       <ul className="space-y-2">
                         {result.playerStats.map((stat) => (
                           <li
                             key={stat.playerName}
                             className={`
-                              flex justify-between items-center py-1
+                              flex justify-between items-center py-1 text-sm sm:text-base
                               ${
                                 result.correctPlayers.some(
                                   (cp) => cp.playerName === stat.playerName
@@ -367,8 +389,10 @@ export default function GameBoard({ game }: GameboardProps) {
                               }
                             `}
                           >
-                            <span>{stat.playerName}</span>
-                            <span>
+                            <span className="truncate pr-2">
+                              {stat.playerName}
+                            </span>
+                            <span className="flex-shrink-0">
                               {stat.value}
                               {result.correctPlayers.some(
                                 (cp) => cp.playerName === stat.playerName
@@ -392,7 +416,7 @@ export default function GameBoard({ game }: GameboardProps) {
             <div className="flex justify-center">
               <button
                 onClick={resetGame}
-                className="bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-8 rounded-lg transition-colors duration-200"
+                className="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 sm:py-3 sm:px-8 rounded-lg transition-colors duration-200 text-sm sm:text-base"
               >
                 Play Again
               </button>
