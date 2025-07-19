@@ -134,6 +134,12 @@ export default function GameBoard({ game }: GameboardProps) {
     return !result?.isCorrect && selections[categoryKey] === playerName;
   };
 
+  const isCorrectAnswer = (categoryKey: string, playerName: string) => {
+    if (!submitted) return false;
+    const { correctPlayers } = findHighestPlayer(categoryKey);
+    return correctPlayers.some((cp) => cp.playerName === playerName);
+  };
+
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Navigation Bar */}
@@ -349,6 +355,17 @@ export default function GameBoard({ game }: GameboardProps) {
                                   category.key
                                 )}
                               </span>
+                              {submitted &&
+                                isCorrectAnswer(
+                                  category.key,
+                                  player.player_name
+                                ) && (
+                                  <div className="flex items-center justify-center">
+                                    <span className="text-yellow-500 text-sm sm:text-base">
+                                      👑
+                                    </span>
+                                  </div>
+                                )}
                             </div>
                           )}
                         </div>
