@@ -237,7 +237,7 @@ export default function GameBoard({ game }: GameboardProps) {
                               }
                               ${
                                 !isSelected && !categoryHasSelection
-                                  ? 'hover:ring-1 hover:ring-gray-300 hover:shadow-md'
+                                  ? 'hover:ring-gray-300 hover:shadow-md'
                                   : ''
                               }
                             `}
