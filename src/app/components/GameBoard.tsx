@@ -151,7 +151,7 @@ export default function GameBoard({ game }: GameboardProps) {
 
             {/* Game Table */}
             <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
-              <table className="w-full">
+              <table className="w-full table-fixed">
                 {/* Header Row */}
                 <thead>
                   <tr>
@@ -162,18 +162,17 @@ export default function GameBoard({ game }: GameboardProps) {
                     {game.selected_players.map((player) => (
                       <th
                         key={player.player_name}
-                        className="bg-gray-50 border-b border-r border-gray-200 p-4 text-center min-w-32"
+                        className="bg-gray-50 border-b border-r border-gray-200 p-4 text-center w-32"
                       >
                         <div className="flex flex-col items-center space-y-2">
                           {player.image_url ? (
-                            <div className="relative w-16 h-16">
+                            <div className="relative w-16 h-16 flex-shrink-0">
                               <Image
                                 src={player.image_url}
                                 alt={player.player_name}
                                 fill
                                 className="object-cover rounded-full border-2 border-gray-300"
                                 onError={() => {
-                                  // Handle error - you'll need to use state for this
                                   console.log(
                                     `Failed to load image for ${player.player_name}`
                                   );
@@ -181,7 +180,7 @@ export default function GameBoard({ game }: GameboardProps) {
                               />
                             </div>
                           ) : (
-                            <div className="w-16 h-16 bg-gray-300 rounded-full flex items-center justify-center font-bold text-sm text-gray-600">
+                            <div className="w-16 h-16 bg-gray-300 rounded-full flex items-center justify-center font-bold text-sm text-gray-600 flex-shrink-0">
                               {player.player_name
                                 .split(' ')
                                 .map((name) => name[0])
@@ -189,7 +188,7 @@ export default function GameBoard({ game }: GameboardProps) {
                             </div>
                           )}
 
-                          <span className="text-sm font-medium text-gray-900 text-center leading-tight">
+                          <span className="text-xs font-medium text-gray-900 text-center leading-tight break-words w-full">
                             {player.player_name}
                           </span>
                         </div>
@@ -211,7 +210,6 @@ export default function GameBoard({ game }: GameboardProps) {
                       </td>
 
                       {/* Player Selection Buttons */}
-                      {/* Player Selection Buttons */}
                       {game.selected_players.map((player) => {
                         const isSelected =
                           selections[category.key] === player.player_name;
@@ -221,18 +219,18 @@ export default function GameBoard({ game }: GameboardProps) {
                           <td
                             key={`${category.key}-${player.player_name}`}
                             className={`
-     p-3
-    ${
-      isSelected
-        ? 'border-2 border-black shadow-lg'
-        : 'border-b border-r border-gray-200'
-    }
-    ${
-      !isSelected && !categoryHasSelection
-        ? 'hover:ring-1 hover:ring-gray-300 hover:shadow-md'
-        : ''
-    }
-  `}
+                              p-3 w-32
+                              ${
+                                isSelected
+                                  ? 'border-2 border-black shadow-lg'
+                                  : 'border-b border-r border-gray-200'
+                              }
+                              ${
+                                !isSelected && !categoryHasSelection
+                                  ? 'hover:ring-1 hover:ring-gray-300 hover:shadow-md'
+                                  : ''
+                              }
+                            `}
                           >
                             <button
                               onClick={() =>
@@ -243,19 +241,19 @@ export default function GameBoard({ game }: GameboardProps) {
                               }
                               disabled={submitted}
                               className={`
-          w-full aspect-square rounded-lg transition-all duration-200 relative overflow-hidden
-          ${
-            isSelected
-              ? ''
-              : categoryHasSelection
-              ? 'opacity-40 grayscale hover:opacity-70'
-              : ''
-          }
-          ${submitted ? 'opacity-60 cursor-not-allowed' : 'cursor-pointer'}
-          ${!submitted && !categoryHasSelection ? 'hover:scale-105' : ''}
-        `}
+                                w-20 h-20 rounded-lg transition-all duration-200 relative overflow-hidden mx-auto block
+                                ${
+                                  isSelected
+                                    ? ''
+                                    : categoryHasSelection
+                                    ? 'opacity-40 grayscale hover:opacity-70'
+                                    : ''
+                                }
+                                ${submitted ? 'opacity-60 cursor-not-allowed' : 'cursor-pointer'}
+                                ${!submitted && !categoryHasSelection ? 'hover:scale-105' : ''}
+                              `}
                             >
-                              {/* Player Image - Full Button */}
+                              {/* Player Image - Fixed Size */}
                               {player.image_url ? (
                                 <Image
                                   src={player.image_url}
