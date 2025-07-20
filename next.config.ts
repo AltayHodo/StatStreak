@@ -10,6 +10,12 @@ const nextConfig: NextConfig = {
         port: '',
         pathname: '/i/headshots/nba/players/full/**',
       },
+      {
+        protocol: 'https',
+        hostname: 'lh3.googleusercontent.com',
+        port: '',
+        pathname: '/**',
+      },
     ],
   },
 };

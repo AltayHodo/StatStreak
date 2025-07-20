@@ -4,6 +4,8 @@ import { DailyGame, GameResult } from '../types/game';
 import { useState } from 'react';
 import React from 'react';
 import Image from 'next/image';
+import { useUser, useSupabaseClient } from '@supabase/auth-helpers-react';
+import AuthButton from './AuthButton';
 
 type GameboardProps = {
   game: DailyGame;
@@ -13,6 +15,9 @@ export default function GameBoard({ game }: GameboardProps) {
   const [selections, setSelections] = useState<Record<string, string>>({});
   const [submitted, setSubmitted] = useState(false);
   const [results, setResults] = useState<GameResult[]>([]);
+
+  const user = useUser();
+  const supabase = useSupabaseClient();
 
   if (!game || !game.selected_players || !game.selected_categories) {
     return <div>Loading game...</div>;
@@ -26,7 +31,7 @@ export default function GameBoard({ game }: GameboardProps) {
     }));
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     const isAllCategoriesSelected = game.selected_categories.every(
       (category) => selections[category.key]
     );
@@ -40,10 +45,112 @@ export default function GameBoard({ game }: GameboardProps) {
     setResults(results);
     setSubmitted(true);
 
+    if (user) {
+      await saveGameResults(results);
+    }
+
     window.scrollTo({
       top: 0,
       behavior: 'smooth',
     });
+  };
+
+  const ensureUserExists = async () => {
+    if (!user) return;
+
+    try {
+      const { data: existingUser } = await supabase
+        .from('users')
+        .select('id')
+        .eq('auth_id', user.id)
+        .single();
+
+      if (!existingUser) {
+        const { error } = await supabase.from('users').insert({
+          auth_id: user.id,
+          email: user.email,
+          username:
+            user.user_metadata?.name || user.email?.split('@')[0] || 'User',
+          total_score: 0,
+          total_guesses: 0,
+          accuracy: 0.0,
+          total_games: 0,
+        });
+
+        if (error) {
+          console.log('Error creating user:', error);
+        }
+      }
+    } catch (error) {
+      console.error('Error ensuring user exists:', error);
+    }
+  };
+
+  const saveGameResults = async (results: GameResult[]) => {
+    if (!user) return;
+
+    await ensureUserExists();
+    try {
+      const score = results.filter((r) => r.isCorrect).length;
+      const totalQuestions = results.length;
+
+      const guessPromises = game.selected_categories.map(async (category) => {
+        const selectedPlayerName = selections[category.key];
+        const selectedPlayer = game.selected_players.find(
+          (p) => p.player_name === selectedPlayerName
+        );
+        const isCorrect =
+          results.find((r) => r.category === category.display_name)
+            ?.isCorrect || false;
+
+        if (selectedPlayer) {
+          return supabase.from('guesses').insert({
+            user_id: user.id,
+            game_id: game.id,
+            player_id: selectedPlayer.id,
+            category: category.key,
+            is_correct: isCorrect,
+          });
+        }
+      });
+
+      await Promise.all(guessPromises.filter(Boolean));
+      await updateUserStats(score, totalQuestions);
+    } catch (error) {
+      console.error('Error saving game results:', error);
+    }
+  };
+
+  const updateUserStats = async (score: number, totalQuestions: number) => {
+    if (!user) return;
+
+    try {
+      const { data: currentStats } = await supabase
+        .from('users')
+        .select('total_games, total_score, total_guesses')
+        .eq('auth_id', user.id)
+        .single();
+
+      if (currentStats) {
+        const newTotalGames = currentStats.total_games + 1;
+        const newTotalScore = currentStats.total_score + score;
+        const newTotalGuesses = currentStats.total_guesses + totalQuestions;
+        const newAccuracy =
+          newTotalGuesses > 0 ? (newTotalScore / newTotalGuesses) * 100 : 0;
+
+        await supabase
+          .from('users')
+          .update({
+            total_games: newTotalGames,
+            total_score: newTotalScore,
+            total_guesses: newTotalGuesses,
+            accuracy: newAccuracy,
+          })
+          .eq('auth_id', user.id);
+      }
+    } catch (error) {
+      console.error('Error updating user stats:', error);
+    }
   };
 
   const resetGame = () => {
@@ -155,12 +262,7 @@ export default function GameBoard({ game }: GameboardProps) {
 
             {/* Right side - Profile and Menu */}
             <div className="flex items-center space-x-2 sm:space-x-4">
-              {/* Profile Photo Placeholder */}
-              <div className="w-6 h-6 sm:w-8 sm:h-8 bg-gray-300 rounded-full flex items-center justify-center">
-                <span className="text-xs sm:text-sm font-medium text-gray-600">
-                  U
-                </span>
-              </div>
+              <AuthButton />
 
               {/* Hamburger Menu */}
               <button className="p-1 sm:p-2 rounded-md text-gray-600 hover:text-gray-900 hover:bg-gray-100">
