@@ -59,14 +59,19 @@ export default function GameBoard({ game }: GameboardProps) {
     if (!user) return;
 
     try {
-      const { data: existingUser } = await supabase
+      const { data: existingUser, error: selectError } = await supabase
         .from('users')
         .select('id')
         .eq('auth_id', user.id)
-        .single();
+        .maybeSingle();
+
+      if (selectError) {
+        console.error('Error checking user existence:', selectError);
+        return;
+      }
 
       if (!existingUser) {
-        const { error } = await supabase.from('users').insert({
+        const { error: insertError } = await supabase.from('users').insert({
           auth_id: user.id,
           email: user.email,
           username:
@@ -77,8 +82,8 @@ export default function GameBoard({ game }: GameboardProps) {
           total_games: 0,
         });
 
-        if (error) {
-          console.log('Error creating user:', error);
+        if (insertError) {
+          console.log('Error creating user:', insertError);
         }
       }
     } catch (error) {
@@ -94,6 +99,18 @@ export default function GameBoard({ game }: GameboardProps) {
       const score = results.filter((r) => r.isCorrect).length;
       const totalQuestions = results.length;
 
+      // Fetch the user's row to get the numeric id
+      const { data: userRow } = await supabase
+        .from('users')
+        .select('id')
+        .eq('auth_id', user.id)
+        .single();
+
+      if (!userRow) {
+        console.error('User row not found');
+        return;
+      }
+
       const guessPromises = game.selected_categories.map(async (category) => {
         const selectedPlayerName = selections[category.key];
         const selectedPlayer = game.selected_players.find(
@@ -104,8 +121,8 @@ export default function GameBoard({ game }: GameboardProps) {
             ?.isCorrect || false;
 
         if (selectedPlayer) {
-          return supabase.from('guesses').insert({
-            user_id: user.id,
+          return supabase.from('Guesses').insert({
+            user_id: userRow.id, // Use the numeric id
             game_id: game.id,
             player_id: selectedPlayer.id,
             category: category.key,
@@ -117,7 +134,7 @@ export default function GameBoard({ game }: GameboardProps) {
       await Promise.all(guessPromises.filter(Boolean));
       await updateUserStats(score, totalQuestions);
     } catch (error) {
-      console.error('Error saving game results:', error);
+      console.log('Error saving game results:', error);
     }
   };
 
