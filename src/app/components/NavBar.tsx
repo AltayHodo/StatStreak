@@ -9,7 +9,7 @@ export default function NavBar() {
           {/* Logo */}
           <div className="flex-shrink-0">
             <h1 className="text-lg sm:text-xl font-bold text-gray-900">
-              <Link href='/'>StatStreak</Link>
+              <Link href="/">StatStreak</Link>
             </h1>
           </div>
 
@@ -20,6 +20,12 @@ export default function NavBar() {
               className="text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors px-2 py-1 rounded"
             >
               Leaderboard
+            </Link>
+            <Link
+              href="/archive"
+              className="text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors px-2 py-1 rounded"
+            >
+              Archive
             </Link>
             <AuthButton />
 

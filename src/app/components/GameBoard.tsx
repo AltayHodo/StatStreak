@@ -5,14 +5,17 @@ import { useState, useEffect } from 'react';
 import React from 'react';
 import Image from 'next/image';
 import { useUser, useSupabaseClient } from '@supabase/auth-helpers-react';
-import NavBar from './NavBar';
 import AuthButton from './AuthButton';
 
 type GameboardProps = {
   game: DailyGame;
+  archiveMode: boolean;
 };
 
-export default function GameBoard({ game }: GameboardProps) {
+export default function GameBoard({
+  game,
+  archiveMode = false,
+}: GameboardProps) {
   const [selections, setSelections] = useState<Record<string, string>>({});
   const [submitted, setSubmitted] = useState(false);
   const [results, setResults] = useState<GameResult[]>([]);
@@ -141,7 +144,7 @@ export default function GameBoard({ game }: GameboardProps) {
     setResults(results);
     setSubmitted(true);
 
-    if (user) {
+    if (user && !archiveMode) {
       await saveGameResults(results);
     }
 
@@ -362,8 +365,6 @@ export default function GameBoard({ game }: GameboardProps) {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <NavBar />
-
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-2 sm:px-4 lg:px-8 py-4 sm:py-8">
         {/* Login Prompt */}
@@ -377,14 +378,28 @@ export default function GameBoard({ game }: GameboardProps) {
         )}
         {/* Game Instructions */}
         <div className="text-center mb-4 sm:mb-8">
-          <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-2">
-            Daily StatStreak
-          </h2>
-          <p className="text-sm sm:text-base text-gray-600 max-w-2xl mx-auto px-4">
-            {!submitted
-              ? 'Select which player you think has the highest value for each stat category!'
-              : 'Results are shown below - green borders indicate correct picks, red borders indicate incorrect picks.'}
-          </p>
+          {archiveMode ? (
+            <>
+              <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-2">
+                StatStreak Archive, {game.game_date}
+              </h2>
+              <p className="text-sm sm:text-base text-gray-600 max-w-2xl mx-auto px-4">
+                Archive games are just for fun and do not affect your stats or
+                leaderboard position.
+              </p>
+            </>
+          ) : (
+            <>
+              <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-2">
+                Daily StatStreak
+              </h2>
+              <p className="text-sm sm:text-base text-gray-600 max-w-2xl mx-auto px-4">
+                {!submitted
+                  ? 'Select which player you think has the highest value for each stat category!'
+                  : 'Results are shown below - green borders indicate correct picks, red borders indicate incorrect picks.'}
+              </p>
+            </>
+          )}
         </div>
 
         {/* Game Table */}

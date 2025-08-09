@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from 'react';
 import { useSupabaseClient } from '@supabase/auth-helpers-react';
-import NavBar from '../components/NavBar';
 
 type UserRow = {
   id: string;
@@ -33,7 +32,6 @@ export default function Leaderboard() {
 
   return (
     <>
-      <NavBar />
       <div className="max-w-2xl mx-auto py-8 px-4">
         <h1 className="text-2xl font-bold mb-6 text-center">Leaderboard</h1>
         <table className="w-full bg-white rounded-lg shadow border">
