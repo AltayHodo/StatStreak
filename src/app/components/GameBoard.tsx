@@ -5,6 +5,7 @@ import { useState } from 'react';
 import React from 'react';
 import Image from 'next/image';
 import { useUser, useSupabaseClient } from '@supabase/auth-helpers-react';
+import NavBar from './NavBar';
 import AuthButton from './AuthButton';
 
 type GameboardProps = {
@@ -266,44 +267,18 @@ export default function GameBoard({ game }: GameboardProps) {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Navigation Bar */}
-      <nav className="bg-white shadow-sm border-b border-gray-200">
-        <div className="max-w-7xl mx-auto px-2 sm:px-4 lg:px-8">
-          <div className="flex justify-between items-center h-12 sm:h-16">
-            {/* Logo */}
-            <div className="flex-shrink-0">
-              <h1 className="text-lg sm:text-xl font-bold text-gray-900">
-                StatStreak
-              </h1>
-            </div>
-
-            {/* Right side - Profile and Menu */}
-            <div className="flex items-center space-x-2 sm:space-x-4">
-              <AuthButton />
-
-              {/* Hamburger Menu */}
-              <button className="p-1 sm:p-2 rounded-md text-gray-600 hover:text-gray-900 hover:bg-gray-100">
-                <svg
-                  className="w-5 h-5 sm:w-6 sm:h-6"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M4 6h16M4 12h16M4 18h16"
-                  />
-                </svg>
-              </button>
-            </div>
-          </div>
-        </div>
-      </nav>
+      <NavBar />
 
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-2 sm:px-4 lg:px-8 py-4 sm:py-8">
+        {/* Login Prompt */}
+        {!user && (
+          <div className="mb-4 sm:mb-6 flex justify-center">
+            <div className="bg-yellow-100 border border-yellow-300 text-yellow-800 px-4 py-2 rounded-md text-sm sm:text-base max-w-xl text-center">
+              <AuthButton className="font-bold text-yellow-900 hover:underline focus:outline-none bg-transparent border-none shadow-none p-0 m-0" /> to save your games and appear on the leaderboard!
+            </div>
+          </div>
+        )}
         {/* Game Instructions */}
         <div className="text-center mb-4 sm:mb-8">
           <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-2">

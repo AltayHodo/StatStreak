@@ -4,7 +4,11 @@ import { useUser, useSupabaseClient } from '@supabase/auth-helpers-react';
 import { useState } from 'react';
 import Image from 'next/image';
 
-export default function AuthButton() {
+export default function AuthButton({
+  className = 'bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white px-3 py-1 sm:px-4 sm:py-2 rounded-md text-sm font-medium transition-colors duration-200',
+}: {
+  className?: string;
+}) {
   const supabase = useSupabaseClient();
   const user = useUser();
   const [loading, setLoading] = useState(false);
@@ -73,9 +77,9 @@ export default function AuthButton() {
     <button
       onClick={handleSignIn}
       disabled={loading}
-      className="bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white px-3 py-1 sm:px-4 sm:py-2 rounded-md text-sm font-medium transition-colors duration-200"
+      className={`${className} cursor-pointer`}
     >
-      {loading ? 'Loading...' : 'Sign In'}
+      {loading ? 'Loading...' : 'Log In'}
     </button>
   );
 }
