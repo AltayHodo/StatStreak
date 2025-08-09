@@ -45,7 +45,75 @@ export default function GameBoard({ game }: GameboardProps) {
     checkIfPlayed();
   }, [user, game.id, supabase]);
 
-  console.log(hasPlayed);
+  const calculateResultsForSelections = (
+    customSelections: Record<string, string>
+  ): GameResult[] => {
+    return game.selected_categories.map((category) => {
+      const { correctPlayers, allStats } = findHighestPlayer(category.key);
+      const userSelection = customSelections[category.key];
+
+      const isCorrect = correctPlayers.some(
+        (player) => player.playerName === userSelection
+      );
+
+      return {
+        category: category.display_name,
+        userSelection,
+        correctAnswer: correctPlayers.map((p) => p.playerName).join(' / '),
+        isCorrect,
+        playerStats: allStats,
+        correctPlayers,
+      };
+    });
+  };
+
+  useEffect(() => {
+    const fetchPreviousGuesses = async () => {
+      if (!user || !hasPlayed) return;
+
+      // Get userRow.id
+      const { data: userRow } = await supabase
+        .from('users')
+        .select('id')
+        .eq('auth_id', user.id)
+        .single();
+
+      if (!userRow) return;
+
+      // Fetch previous guesses for this game
+      const { data: guesses } = await supabase
+        .from('Guesses')
+        .select('category, player_id')
+        .eq('user_id', userRow.id)
+        .eq('game_id', game.id);
+
+      if (!guesses) return;
+
+      // Build selections object from guesses
+      const newSelections: Record<string, string> = {};
+      guesses.forEach((guess) => {
+        // Find the player name for this player_id
+        const player = game.selected_players.find(
+          (p) => p.id === guess.player_id
+        );
+        if (player) {
+          newSelections[guess.category] = player.player_name;
+        }
+      });
+
+      setSelections(newSelections);
+
+      // Calculate results based on these selections
+      const prevResults = calculateResultsForSelections(newSelections);
+      setResults(prevResults);
+      setSubmitted(true);
+    };
+
+    if (hasPlayed && user) {
+      fetchPreviousGuesses();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [hasPlayed, user, game.id]);
 
   if (!game || !game.selected_players || !game.selected_categories) {
     return <div>Loading game...</div>;
@@ -111,7 +179,7 @@ export default function GameBoard({ game }: GameboardProps) {
         });
 
         if (insertError) {
-          console.log('Error creating user:', insertError);
+          console.error('Error creating user:', insertError);
         }
       }
     } catch (error) {
@@ -162,7 +230,7 @@ export default function GameBoard({ game }: GameboardProps) {
       await Promise.all(guessPromises.filter(Boolean));
       await updateUserStats(score, totalQuestions);
     } catch (error) {
-      console.log('Error saving game results:', error);
+      console.error('Error saving game results:', error);
     }
   };
 
