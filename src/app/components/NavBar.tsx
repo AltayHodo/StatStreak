@@ -1,4 +1,5 @@
 import AuthButton from './AuthButton';
+import Link from 'next/link';
 
 export default function NavBar() {
   return (
@@ -8,12 +9,18 @@ export default function NavBar() {
           {/* Logo */}
           <div className="flex-shrink-0">
             <h1 className="text-lg sm:text-xl font-bold text-gray-900">
-              StatStreak
+              <Link href='/'>StatStreak</Link>
             </h1>
           </div>
 
           {/* Right side - Profile and Menu */}
           <div className="flex items-center space-x-2 sm:space-x-4">
+            <Link
+              href="/leaderboard"
+              className="text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors px-2 py-1 rounded"
+            >
+              Leaderboard
+            </Link>
             <AuthButton />
 
             {/* Hamburger Menu */}

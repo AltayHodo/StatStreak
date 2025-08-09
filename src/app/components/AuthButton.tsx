@@ -65,7 +65,7 @@ export default function AuthButton({
         </div>
         <button
           onClick={handleSignOut}
-          className="text-sm text-gray-600 hover:text-gray-900 transition-colors"
+          className="text-sm text-gray-600 hover:text-gray-900 transition-colors cursor-pointer"
         >
           Sign out
         </button>
