@@ -366,7 +366,13 @@ export default function GameBoard({
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Main Content */}
-      <main className="max-w-7xl mx-auto px-2 sm:px-4 lg:px-8 py-4 sm:py-8">
+      <main
+        className={
+          archiveMode
+            ? 'w-full px-0 py-0'
+            : 'max-w-7xl mx-auto px-2 sm:px-4 lg:px-8 py-4 sm:py-8'
+        }
+      >
         {/* Login Prompt */}
         {!user && (
           <div className="mb-4 sm:mb-6 flex justify-center">
