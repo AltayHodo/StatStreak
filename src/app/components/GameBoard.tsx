@@ -1,7 +1,7 @@
 'use client';
 
 import { DailyGame, GameResult } from '../types/game';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import React from 'react';
 import Image from 'next/image';
 import { useUser, useSupabaseClient } from '@supabase/auth-helpers-react';
@@ -16,9 +16,36 @@ export default function GameBoard({ game }: GameboardProps) {
   const [selections, setSelections] = useState<Record<string, string>>({});
   const [submitted, setSubmitted] = useState(false);
   const [results, setResults] = useState<GameResult[]>([]);
-
+  const [hasPlayed, setHasPlayed] = useState(false);
   const user = useUser();
   const supabase = useSupabaseClient();
+
+  useEffect(() => {
+    const checkIfPlayed = async () => {
+      if (!user) return;
+      const { data: userRow } = await supabase
+        .from('users')
+        .select('id')
+        .eq('auth_id', user.id)
+        .single();
+
+      if (!userRow) {
+        setHasPlayed(false);
+        return;
+      }
+      const { data } = await supabase
+        .from('Guesses')
+        .select('id')
+        .eq('user_id', userRow.id)
+        .eq('game_id', game.id);
+      if (data && data.length > 0) setHasPlayed(true);
+      else setHasPlayed(false);
+    };
+
+    checkIfPlayed();
+  }, [user, game.id, supabase]);
+
+  console.log(hasPlayed);
 
   if (!game || !game.selected_players || !game.selected_categories) {
     return <div>Loading game...</div>;
@@ -275,7 +302,8 @@ export default function GameBoard({ game }: GameboardProps) {
         {!user && (
           <div className="mb-4 sm:mb-6 flex justify-center">
             <div className="bg-yellow-100 border border-yellow-300 text-yellow-800 px-4 py-2 rounded-md text-sm sm:text-base max-w-xl text-center">
-              <AuthButton className="font-bold text-yellow-900 hover:underline focus:outline-none bg-transparent border-none shadow-none p-0 m-0" /> to save your games and appear on the leaderboard!
+              <AuthButton className="font-bold text-yellow-900 hover:underline focus:outline-none bg-transparent border-none shadow-none p-0 m-0" />{' '}
+              to save your games and appear on the leaderboard!
             </div>
           </div>
         )}
