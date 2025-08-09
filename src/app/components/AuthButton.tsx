@@ -67,7 +67,7 @@ export default function AuthButton({
           onClick={handleSignOut}
           className="text-sm text-gray-600 hover:text-gray-900 transition-colors cursor-pointer"
         >
-          Sign out
+          Log out
         </button>
       </div>
     );
