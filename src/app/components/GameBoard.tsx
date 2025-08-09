@@ -144,8 +144,8 @@ export default function GameBoard({
     setResults(results);
     setSubmitted(true);
 
-    if (user && !archiveMode) {
-      await saveGameResults(results);
+    if (user) {
+      await saveGameResults(results, archiveMode);
     }
 
     window.scrollTo({
@@ -190,7 +190,10 @@ export default function GameBoard({
     }
   };
 
-  const saveGameResults = async (results: GameResult[]) => {
+  const saveGameResults = async (
+    results: GameResult[],
+    archiveMode = false
+  ) => {
     if (!user) return;
 
     await ensureUserExists();
@@ -231,7 +234,10 @@ export default function GameBoard({
       });
 
       await Promise.all(guessPromises.filter(Boolean));
-      await updateUserStats(score, totalQuestions);
+
+      if (!archiveMode) {
+        await updateUserStats(score, totalQuestions);
+      }
     } catch (error) {
       console.error('Error saving game results:', error);
     }
@@ -269,11 +275,11 @@ export default function GameBoard({
     }
   };
 
-  const resetGame = () => {
-    setSelections({});
-    setSubmitted(false);
-    setResults([]);
-  };
+  // const resetGame = () => {
+  //   setSelections({});
+  //   setSubmitted(false);
+  //   setResults([]);
+  // };
 
   const findHighestPlayer = (categoryKey: string) => {
     const playerStats = game.selected_players.map((player) => {
@@ -609,16 +615,6 @@ export default function GameBoard({
               <p className="text-sm sm:text-base text-gray-600 mb-4">
                 Correct Answers
               </p>
-            </div>
-
-            {/* Play Again Button */}
-            <div className="flex justify-center">
-              <button
-                onClick={resetGame}
-                className="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 sm:py-3 sm:px-8 rounded-lg transition-colors duration-200 text-sm sm:text-base"
-              >
-                Play Again
-              </button>
             </div>
           </div>
         )}
