@@ -48,6 +48,24 @@ export default function GameBoard({
     checkIfPlayed();
   }, [user, game.id, supabase]);
 
+  useEffect(() => {
+    if (!user) {
+      const played = localStorage.getItem(`statstreak_played_${game.id}`);
+      if (played === 'true') {
+        setHasPlayed(true);
+        const savedSelections = localStorage.getItem(
+          `statstreak_selections_${game.id}`
+        );
+        const savedResults = localStorage.getItem(
+          `statstreak_results_${game.id}`
+        );
+        if (savedSelections) setSelections(JSON.parse(savedSelections));
+        if (savedResults) setResults(JSON.parse(savedResults));
+        setSubmitted(true);
+      }
+    }
+  }, [user, game.id]);
+
   const calculateResultsForSelections = (
     customSelections: Record<string, string>
   ): GameResult[] => {
@@ -146,6 +164,18 @@ export default function GameBoard({
 
     if (user) {
       await saveGameResults(results, archiveMode);
+    }
+
+    if (!user) {
+      localStorage.setItem(`statstreak_played_${game.id}`, 'true');
+      localStorage.setItem(
+        `statstreak_selections_${game.id}`,
+        JSON.stringify(selections)
+      );
+      localStorage.setItem(
+        `statstreak_results_${game.id}`,
+        JSON.stringify(results)
+      );
     }
 
     window.scrollTo({
