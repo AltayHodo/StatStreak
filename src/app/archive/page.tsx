@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useSupabaseClient } from '@supabase/auth-helpers-react';
 import { useUser } from '@supabase/auth-helpers-react';
+import AuthButton from '../components/AuthButton';
 
 type GameRow = {
   id: number;
@@ -55,6 +56,18 @@ export default function Archive() {
     };
     fetchPlayedGames();
   }, [supabase, user]);
+
+  if (!user) {
+    return (
+      <div className="max-w-xl mx-auto py-12 px-4 text-center">
+        <div className="bg-yellow-100 border border-yellow-300 text-yellow-800 px-4 py-3 rounded-md text-base mb-4">
+          Please{' '}
+          <AuthButton className="font-bold text-yellow-900 hover:underline bg-transparent border-none shadow-none p-0 m-0" />{' '}
+          to access the archive.
+        </div>
+      </div>
+    );
+  }
 
   return (
     <>
