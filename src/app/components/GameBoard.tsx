@@ -50,6 +50,15 @@ export default function GameBoard({
 
   useEffect(() => {
     if (!user) {
+      setHasPlayed(false);
+      setSubmitted(false);
+      setSelections({});
+      setResults([]);
+    }
+  }, [user]);
+
+  useEffect(() => {
+    if (!user) {
       const played = localStorage.getItem(`statstreak_played_${game.id}`);
       if (played === 'true') {
         setHasPlayed(true);
@@ -414,7 +423,8 @@ export default function GameBoard({
           <div className="mb-4 sm:mb-6 flex justify-center">
             <div className="bg-yellow-100 border border-yellow-300 text-yellow-800 px-4 py-2 rounded-md text-sm sm:text-base max-w-xl text-center">
               <AuthButton className="font-bold text-yellow-900 hover:underline focus:outline-none bg-transparent border-none shadow-none p-0 m-0" />{' '}
-              to save your games, appear on the leaderboard, and access the archive!
+              to save your games, appear on the leaderboard, and access the
+              archive!
             </div>
           </div>
         )}
