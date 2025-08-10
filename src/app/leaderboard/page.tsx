@@ -14,6 +14,9 @@ export default function Leaderboard() {
   const supabase = useSupabaseClient();
   const [users, setUsers] = useState<UserRow[]>([]);
   const [loading, setLoading] = useState(true);
+  const [sortBy, setSortBy] = useState<'total_score' | 'accuracy'>(
+    'total_score'
+  );
 
   useEffect(() => {
     const fetchLeaderboard = async () => {
@@ -21,19 +24,32 @@ export default function Leaderboard() {
       const { data, error } = await supabase
         .from('users')
         .select('id, username, accuracy, total_score')
-        .order('total_score', { ascending: false });
+        .order(sortBy, { ascending: false });
 
       if (!error && data) setUsers(data);
       setLoading(false);
     };
 
     fetchLeaderboard();
-  }, [supabase]);
+  }, [supabase, sortBy]);
 
   return (
     <>
       <div className="max-w-2xl mx-auto py-8 px-4">
         <h1 className="text-2xl font-bold mb-6 text-center">Leaderboard</h1>
+        <div className="flex justify-end mb-4">
+          <label className="mr-2 font-medium">Sort by:</label>
+          <select
+            value={sortBy}
+            onChange={(e) =>
+              setSortBy(e.target.value as 'total_score' | 'accuracy')
+            }
+            className="border rounded px-2 py-1"
+          >
+            <option value="total_score">Total Score</option>
+            <option value="accuracy">Accuracy</option>
+          </select>
+        </div>
         <table className="w-full bg-white rounded-lg shadow border">
           <thead>
             <tr className="bg-gray-100">
