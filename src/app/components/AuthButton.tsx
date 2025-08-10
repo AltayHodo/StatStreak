@@ -20,6 +20,9 @@ export default function AuthButton({
         provider: 'google',
         options: {
           redirectTo: `${window.location.href}/`,
+          queryParams: {
+            prompt: 'select_account',
+          },
         },
       });
       if (error) throw error;
