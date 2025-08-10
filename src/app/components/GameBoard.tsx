@@ -9,7 +9,7 @@ import AuthButton from './AuthButton';
 
 type GameboardProps = {
   game: DailyGame;
-  archiveMode: boolean;
+  archiveMode?: boolean;
 };
 
 export default function GameBoard({
