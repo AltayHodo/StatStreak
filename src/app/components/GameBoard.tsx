@@ -433,7 +433,12 @@ export default function GameBoard({
           {archiveMode ? (
             <>
               <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-2">
-                StatStreak Archive, {game.game_date}
+                StatStreak Archive:{' '}
+                {new Date(game.game_date).toLocaleDateString(undefined, {
+                  year: 'numeric',
+                  month: 'long',
+                  day: 'numeric',
+                })}
               </h2>
               <p className="text-sm sm:text-base text-gray-600 max-w-2xl mx-auto px-4">
                 Archive games are just for fun and do not affect your stats or
