@@ -1,0 +1,8 @@
+{
+  "cron": [
+    {
+      "path": "/api/generate-daily-game",
+      "schedule": "0 0 * * *"
+    }
+  ]
+}
