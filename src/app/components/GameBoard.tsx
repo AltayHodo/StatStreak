@@ -503,7 +503,7 @@ export default function GameBoard({
 
                       {/* Flexible height container for names */}
                       <div className="flex-1 flex items-start justify-center">
-                        <span className="text-[10px] sm:text-xs font-medium text-gray-900 text-center leading-tight break-words w-full px-1">
+                        <span className="text-[9px] sm:text-xs font-medium text-gray-900 text-center leading-tight break-words w-full max-w-[48px] sm:max-w-none px-1">
                           {player.player_name}
                         </span>
                       </div>
@@ -521,7 +521,7 @@ export default function GameBoard({
                   className={rowIndex % 2 === 0 ? 'bg-white' : 'bg-gray-50'}
                 >
                   {/* Category Label */}
-                  <td className="border-b border-r border-gray-200 p-2 sm:p-3 md:p-4 font-medium text-gray-800 bg-gray-50 text-xs sm:text-sm md:text-base leading-tight">
+                  <td className="border-b border-r border-gray-200 p-1 font-medium text-gray-800 bg-gray-50 text-[8px] w-8 max-w-[2.5rem] min-w-0 break-words whitespace-normal">
                     {category.display_name}
                   </td>
 
