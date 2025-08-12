@@ -461,18 +461,18 @@ export default function GameBoard({
 
         {/* Game Table */}
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-x-auto">
-          <table className="w-full table-fixed min-w-max">
+          <table className="stat-table w-full table-fixed min-w-max">
             {/* Header Row */}
             <thead>
               <tr>
                 {/* Empty top-left cell */}
-                <th className="bg-gray-50 border-b border-r border-gray-200 p-2 sm:p-4 w-24 sm:w-32 md:w-48 min-w-[6rem]"></th>
+                <th className="bg-gray-50 border-b border-r border-gray-200 p-1 sm:p-2 md:p-4 w-12 min-w-[2.5rem] max-w-[4rem] text-[10px] sm:text-xs md:text-sm break-words whitespace-normal align-top"></th>
 
                 {/* Player Headers */}
                 {game.selected_players.map((player) => (
                   <th
                     key={player.player_name}
-                    className="bg-gray-50 border-b border-r border-gray-200 p-1 sm:p-2 md:p-4 text-center w-16 sm:w-20 md:w-32 min-w-[4rem] align-top"
+                    className="bg-gray-50 border-b border-r border-gray-200 p-1 sm:p-2 md:p-4 text-center w-14 sm:w-16 md:w-24 min-w-[2.5rem] align-top"
                   >
                     <div className="flex flex-col h-full">
                       {/* Fixed height container for images */}
@@ -521,7 +521,7 @@ export default function GameBoard({
                   className={rowIndex % 2 === 0 ? 'bg-white' : 'bg-gray-50'}
                 >
                   {/* Category Label */}
-                  <td className="border-b border-r border-gray-200 p-1 font-medium text-gray-800 bg-gray-50 text-[8px] w-8 max-w-[2.5rem] min-w-0 break-words whitespace-normal">
+                  <td className="border-b border-r border-gray-200 p-1 sm:p-2 md:p-3 font-medium text-gray-800 bg-gray-50 text-[8px] sm:text-xs md:text-sm w-12 min-w-[2.5rem] max-w-[4rem] break-words whitespace-normal">
                     {category.display_name}
                   </td>
 
@@ -543,7 +543,8 @@ export default function GameBoard({
                       <td
                         key={`${category.key}-${player.player_name}`}
                         className={`
-                          p-1 sm:p-2 md:p-3 w-16 sm:w-20 md:w-32
+                          p-1 sm:p-2 md:p-3 w-14 sm:w-16 md:w-24
+                          text-[10px] sm:text-xs md:text-sm
                           ${
                             isCorrect
                               ? 'border-2 border-green-500 shadow-lg'
