@@ -54,8 +54,17 @@ export default function GameBoard({
       setSubmitted(false);
       setSelections({});
       setResults([]);
+    } else {
+      // User just logged in: clear localStorage state for this game
+      localStorage.removeItem(`statstreak_played_${game.id}`);
+      localStorage.removeItem(`statstreak_selections_${game.id}`);
+      localStorage.removeItem(`statstreak_results_${game.id}`);
+      setHasPlayed(false);
+      setSubmitted(false);
+      setSelections({});
+      setResults([]);
     }
-  }, [user]);
+  }, [user, game.id]);
 
   useEffect(() => {
     if (!user) {
@@ -413,9 +422,7 @@ export default function GameBoard({
       {/* Main Content */}
       <main
         className={
-          archiveMode
-            ? 'w-full px-0 py-0'
-            : 'max-w-7xl mx-auto px-2 sm:px-4 lg:px-8 py-4 sm:py-8'
+           'max-w-7xl mx-auto px-2 sm:px-4 lg:px-8 py-4 sm:py-8'
         }
       >
         {/* Login Prompt */}

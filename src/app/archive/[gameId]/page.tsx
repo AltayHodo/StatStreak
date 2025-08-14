@@ -31,25 +31,21 @@ export default function ArchiveGamePage() {
 
   return (
     <>
-      <div className="max-w-4xl mx-auto py-8 px-4">
-        {loading ? (
-          <div>Loading game...</div>
-        ) : game ? (
-          <GameBoard game={game} archiveMode />
-        ) : (
-          <div className="flex flex-col items-center justify-center py-16">
-            <span className="text-2xl font-semibold mb-4">
-              Game not found.
-            </span>
-            <Link
-              href="/archive"
-              className="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-6 rounded-lg transition-colors duration-200 shadow"
-            >
-              Go Back to Archive
-            </Link>
-          </div>
-        )}
-      </div>
+      {loading ? (
+        <div>Loading game...</div>
+      ) : game ? (
+        <GameBoard game={game} archiveMode />
+      ) : (
+        <div className="flex flex-col items-center justify-center py-16">
+          <span className="text-2xl font-semibold mb-4">Game not found.</span>
+          <Link
+            href="/archive"
+            className="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-6 rounded-lg transition-colors duration-200 shadow"
+          >
+            Go Back to Archive
+          </Link>
+        </div>
+      )}
     </>
   );
 }
