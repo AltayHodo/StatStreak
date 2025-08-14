@@ -2,8 +2,7 @@
   "crons": [
     {
       "path": "/api/generate-daily-game",
-      "schedule": "0 8 * * *",
-      "timezone": "America/Los_Angeles"
+      "schedule": "0 8 * * *"
     }
   ]
 }
