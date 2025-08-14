@@ -420,11 +420,7 @@ export default function GameBoard({
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Main Content */}
-      <main
-        className={
-           'max-w-7xl mx-auto px-2 sm:px-4 lg:px-8 py-4 sm:py-8'
-        }
-      >
+      <main className={'max-w-7xl mx-auto px-2 sm:px-4 lg:px-8 py-4 sm:py-8'}>
         {/* Login Prompt */}
         {!user && (
           <div className="mb-4 sm:mb-6 flex justify-center">
@@ -549,54 +545,47 @@ export default function GameBoard({
                     return (
                       <td
                         key={`${category.key}-${player.player_name}`}
+                        onClick={() => {
+                          if (!submitted)
+                            handlePlayerSelect(
+                              category.key,
+                              player.player_name
+                            );
+                        }}
                         className={`
-                          p-1 sm:p-2 md:p-3 w-14 sm:w-16 md:w-24
-                          text-[10px] sm:text-xs md:text-sm
-                          ${
-                            isCorrect
-                              ? 'border-2 border-green-500 shadow-lg'
-                              : isIncorrect
-                              ? 'border-2 border-red-500 shadow-lg'
-                              : isSelected
-                              ? 'border-2 border-black shadow-lg'
-                              : 'border-b border-r border-gray-200'
-                          }
-                          ${
-                            !isSelected && !categoryHasSelection && !submitted
-                              ? 'hover:ring-gray-300 hover:shadow-md'
-                              : ''
-                          }
-                        `}
+    p-1 sm:p-2 md:p-3 w-14 sm:w-16 md:w-24
+    text-[10px] sm:text-xs md:text-sm
+    ${
+      isCorrect
+        ? 'border-2 border-green-500 shadow-lg'
+        : isIncorrect
+        ? 'border-2 border-red-500 shadow-lg'
+        : isSelected
+        ? 'border-2 border-black shadow-lg'
+        : 'border-b border-r border-gray-200'
+    }
+    ${
+      !isSelected && !categoryHasSelection && !submitted
+        ? 'hover:ring-gray-300 hover:shadow-md'
+        : ''
+    }
+    ${submitted ? 'cursor-not-allowed' : 'cursor-pointer'}
+  `}
                       >
                         <div className="flex flex-col items-center space-y-1">
-                          <button
-                            onClick={() =>
-                              handlePlayerSelect(
-                                category.key,
-                                player.player_name
-                              )
-                            }
-                            disabled={submitted}
+                          <div
                             className={`
-                              w-12 h-12 sm:w-16 sm:h-16 md:w-20 md:h-20 rounded-lg transition-all duration-200 relative overflow-hidden mx-auto block
-                              ${
-                                isSelected
-                                  ? ''
-                                  : categoryHasSelection
-                                  ? 'opacity-40 grayscale hover:opacity-70'
-                                  : ''
-                              }
-                              ${
-                                submitted
-                                  ? 'opacity-60 cursor-not-allowed'
-                                  : 'cursor-pointer'
-                              }
-                              ${
-                                !submitted && !categoryHasSelection
-                                  ? 'hover:scale-105'
-                                  : ''
-                              }
-                            `}
+        w-12 h-12 sm:w-16 sm:h-16 md:w-20 md:h-20 rounded-lg transition-all duration-200 relative overflow-hidden mx-auto block
+        ${
+          isSelected
+            ? ''
+            : categoryHasSelection
+            ? 'opacity-40 grayscale hover:opacity-70'
+            : ''
+        }
+        ${submitted ? 'opacity-60' : ''}
+        ${!submitted && !categoryHasSelection ? 'hover:scale-105' : ''}
+      `}
                           >
                             {/* Player Image - Fixed Size */}
                             {player.image_url ? (
@@ -614,7 +603,7 @@ export default function GameBoard({
                                   .join('')}
                               </div>
                             )}
-                          </button>
+                          </div>
 
                           {/* Player Stat Display */}
                           {submitted && (
