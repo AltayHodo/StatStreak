@@ -1,12 +1,12 @@
 'use client';
 
 import { useUser, useSupabaseClient } from '@supabase/auth-helpers-react';
-import { useState } from 'react';
+import { useState, Suspense } from 'react';
 import Image from 'next/image';
 import { usePathname, useSearchParams } from 'next/navigation';
 
-export default function AuthButton({
-  className = 'bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white px-3 py-1 sm:px-4 sm:py-2 rounded-md text-sm font-medium transition-colors duration-200',
+function AuthButtonInner({
+  className = 'bg-blue-600 hover:bg-blue-700 text-white font-medium py-1 px-4 rounded-lg transition-colors duration-200 shadow',
 }: {
   className?: string;
 }) {
@@ -24,8 +24,6 @@ export default function AuthButton({
       const redirectUrl = `${window.location.origin}${pathname}${
         params ? `?${params}` : ''
       }`;
-
-      console.log(redirectUrl)
 
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
@@ -95,5 +93,13 @@ export default function AuthButton({
     >
       {loading ? 'Loading...' : 'Log In'}
     </button>
+  );
+}
+
+export default function AuthButton(props: { className?: string }) {
+  return (
+    <Suspense fallback={<button disabled>Loading...</button>}>
+      <AuthButtonInner {...props} />
+    </Suspense>
   );
 }
