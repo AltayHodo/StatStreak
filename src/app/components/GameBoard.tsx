@@ -1,21 +1,21 @@
 'use client';
 
-import { DailyGame, GameResult } from '../types/game';
+import {GameResult, GameBoardProps } from '../types/game';
 import { useState, useEffect } from 'react';
 import React from 'react';
 import Image from 'next/image';
 import { useUser, useSupabaseClient } from '@supabase/auth-helpers-react';
 import AuthButton from './AuthButton';
 
-type GameboardProps = {
-  game: DailyGame;
-  archiveMode?: boolean;
-};
+// type GameboardProps = {
+//   game: DailyGame;
+//   archiveMode?: boolean;
+// };
 
 export default function GameBoard({
   game,
   archiveMode = false,
-}: GameboardProps) {
+}: GameBoardProps) {
   const [selections, setSelections] = useState<Record<string, string>>({});
   const [submitted, setSubmitted] = useState(false);
   const [results, setResults] = useState<GameResult[]>([]);

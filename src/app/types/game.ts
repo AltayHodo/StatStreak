@@ -28,3 +28,8 @@ export type GameResult = {
   playerStats: { playerName: string; value: number}[];
   correctPlayers: { playerName: string; value: number }[];
 }
+
+export type GameBoardProps = {
+  game: DailyGame;
+  archiveMode?: boolean;
+};

@@ -1,4 +1,5 @@
 import GameBoard from './components/GameBoard';
+import GameBoardWrapper from './components/GameBoardWrapper';
 
 export default async function Home() {
   const res = await fetch(
@@ -11,7 +12,7 @@ export default async function Home() {
 
   return (
     <div>
-      <GameBoard game={game} />
+      <GameBoardWrapper game={game} />
     </div>
   );
 }
