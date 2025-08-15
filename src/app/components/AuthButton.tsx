@@ -3,6 +3,7 @@
 import { useUser, useSupabaseClient } from '@supabase/auth-helpers-react';
 import { useState } from 'react';
 import Image from 'next/image';
+import { usePathname, useSearchParams } from 'next/navigation';
 
 export default function AuthButton({
   className = 'bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white px-3 py-1 sm:px-4 sm:py-2 rounded-md text-sm font-medium transition-colors duration-200',
@@ -13,13 +14,23 @@ export default function AuthButton({
   const user = useUser();
   const [loading, setLoading] = useState(false);
 
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+
   const handleSignIn = async () => {
     setLoading(true);
     try {
+      const params = searchParams.toString();
+      const redirectUrl = `${window.location.origin}${pathname}${
+        params ? `?${params}` : ''
+      }`;
+
+      console.log(redirectUrl)
+
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          redirectTo: window.location.href,
+          redirectTo: redirectUrl,
           queryParams: {
             prompt: 'select_account',
           },
