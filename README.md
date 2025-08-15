@@ -1,4 +1,5 @@
 ## StatStreak
+[Play StatStreak here!](https://statstreak.vercel.app)
 
 StatStreak is a daily NBA game where you guess which player, from a given set, leads certain stat categories
 
@@ -7,4 +8,4 @@ StatStreak is a daily NBA game where you guess which player, from a given set, l
 - **Backend:** Supabase (database and authentication)
 - **Web Scraping:** Cheerio.js
 
-Inspired by [Poeltl](https://poeltl.dunk.town/), [LarryBirdle](https://larrybirdle.com/), [HoopGrids](https://hoopgrids.com/)
+Inspired by [Poeltl](https://poeltl.nbpa.com/), [LarryBirdle](https://larrybirdle.com/), [HoopGrids](https://hoopgrids.com/)
