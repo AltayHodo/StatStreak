@@ -1,4 +1,3 @@
-import GameBoard from './components/GameBoard';
 import GameBoardWrapper from './components/GameBoardWrapper';
 
 export default async function Home() {
