@@ -1,9 +1,13 @@
 import { NextResponse } from 'next/server';
 import { generateDailyGame } from '@/app/lib/gameGenerator';
 import { supabaseAdmin } from '@/app/utils/supabaseAdmin';
+import { format } from 'date-fns-tz';
 
 export async function GET() {
-  const today = new Date().toISOString().split('T')[0];
+  const timeZone = 'America/Los_Angeles';
+  const now = new Date();
+  const today = format(now, 'yyyy-MM-dd', { timeZone });
+
   let { data: todaysGame } = await supabaseAdmin
     .from('Games')
     .select('*')
