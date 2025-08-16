@@ -1,6 +1,6 @@
 'use client';
 
-import {GameResult, GameBoardProps } from '../types/game';
+import { GameResult, GameBoardProps } from '../types/game';
 import { useState, useEffect } from 'react';
 import React from 'react';
 import Image from 'next/image';
@@ -455,7 +455,7 @@ export default function GameBoard({
               </h2>
               <p className="text-sm sm:text-base text-gray-600 max-w-2xl mx-auto px-4">
                 {!submitted
-                  ? 'Select which player you think has the highest value for each stat category!'
+                  ? 'Select which player you think has the highest value for each stat category (from the 2024-2025 season)'
                   : 'Results are shown below - green borders indicate correct picks, red borders indicate incorrect picks.'}
               </p>
             </>
