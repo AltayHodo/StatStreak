@@ -1,7 +1,10 @@
-import { supabase } from '../utils/supabaseClient';
 import { Player, StatCategory } from '../types/player';
+import { SupabaseClient } from '@supabase/supabase-js';
 
-export async function generateDailyGame(date: string) {
+export async function generateDailyGame(
+  date: string,
+  supabase: SupabaseClient
+) {
   const { data: players, error: fetchError } = await supabase
     .from('Players')
     .select('*');
