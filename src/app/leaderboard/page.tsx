@@ -218,7 +218,7 @@ const SAMPLE_USERS: UserRow[] = [
     accuracy: 76.4,
     total_score: 62,
   },
-  { id: 'sample12', username: 'Barbara Lopez', accuracy: 84, total_score: 61 },
+  { id: 'sample12', username: 'Barbie', accuracy: 84, total_score: 61 },
   {
     id: 'sample13',
     username: 'Richard Gonzalez',
@@ -372,7 +372,7 @@ const SAMPLE_USERS: UserRow[] = [
   { id: 'sample58', username: 'Linda Davis', accuracy: 80.9, total_score: 15 },
   {
     id: 'sample59',
-    username: 'William Rodriguez',
+    username: 'William',
     accuracy: 95,
     total_score: 140,
   },
@@ -390,7 +390,7 @@ const SAMPLE_USERS: UserRow[] = [
   },
   {
     id: 'sample62',
-    username: 'Barbara Lopez',
+    username: 'Barbarian',
     accuracy: 84.7,
     total_score: 111,
   },
@@ -1933,7 +1933,7 @@ const SAMPLE_USERS: UserRow[] = [
   },
   {
     id: 'sample410',
-    username: 'Jasper Olsen',
+    username: 'ajkl3a',
     accuracy: 91.5,
     total_score: 60,
   },
@@ -2624,7 +2624,7 @@ const SAMPLE_USERS: UserRow[] = [
   },
   {
     id: 'sample571',
-    username: 'Yasmine Elbaz',
+    username: 'slimreaper$',
     accuracy: 92.3,
     total_score: 64,
   },
