@@ -2995,7 +2995,7 @@ const SAMPLE_USERS: UserRow[] = [
   },
   {
     id: 'sample677',
-    username: 'Ethan Nguyen',
+    username: 'DemonSLayer',
     accuracy: 81.4,
     total_score: 90,
   },
